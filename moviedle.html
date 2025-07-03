@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movierdle - Movie Guessing Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #fff;
+    }
+
+    .game-container {
+      background: #000;
+      border: 3px solid #ffd700;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+      position: relative;
+    }
+
+    h1 {
+      color: #ffd700;
+      font-size: 2.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 8px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #ccc;
+      margin-bottom: 25px;
+      font-size: 1rem;
+    }
+
+    .settings-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #1a1a1a;
+      border: 2px solid #ffd700;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.3s ease;
+      color: #ffd700;
+    }
+
+    .settings-button:hover {
+      background: #ffd700;
+      color: #000;
+      transform: rotate(90deg);
+    }
+
+    .settings-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+    }
+
+    .settings-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1a1a1a;
+      border: 3px solid #ffd700;
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 15px 35px rgba(255, 215, 0, 0.3);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .settings-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #ffd700;
+    }
+
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #ffd700;
+      padding: 5px;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .close-button:hover {
+      background: #ffd700;
+      color: #000;
+    }
+
+    .setting-group {
+      margin-bottom: 20px;
+    }
+
+    .setting-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #ffd700;
+    }
+
+    .guess-options {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .guess-option {
+      padding: 8px 16px;
+      border: 2px solid #ffd700;
+      border-radius: 6px;
+      background: #1a1a1a;
+      color: #ffd700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
+    .guess-option:hover {
+      background: #ffd700;
+      color: #000;
+    }
+
+    .guess-option.active {
+      background: #ffd700;
+      color: #000;
+    }
+
+    .instructions {
+      padding: 15px;
+      background: #2d2d2d;
+      border: 2px solid #ffd700;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.6;
+    }
+
+    .instructions strong {
+      color: #ffd700;
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 2px solid #ffd700;
+      border-radius: 8px;
+      background: #1a1a1a;
+      color: #fff;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .search-input:focus {
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    .search-input::placeholder {
+      color: #888;
+    }
+
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #1a1a1a;
+      border: 2px solid #ffd700;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .suggestion-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      border-bottom: 1px solid #333;
+      color: #fff;
+    }
+
+    .suggestion-item:hover {
+      background-color: #2d2d2d;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .guess-button {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      border: 2px solid #ffd700;
+      border-radius: 8px;
+      background: #ffd700;
+      color: #000;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 44px;
+    }
+
+    .guess-button:hover:not(:disabled) {
+      background: #1a1a1a;
+      color: #ffd700;
+    }
+
+    .guess-button:disabled {
+      background: #333;
+      color: #666;
+      border-color: #333;
+      cursor: not-allowed;
+    }
+
+    .new-game-button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border: 2px solid #ffd700;
+      border-radius: 8px;
+      background: #1a1a1a;
+      color: #ffd700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 44px;
+    }
+
+    .new-game-button:hover {
+      background: #ffd700;
+      color: #000;
+    }
+
+    .game-info {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 25px;
+      padding: 15px;
+      background: #1a1a1a;
+      border: 2px solid #ffd700;
+      border-radius: 8px;
+    }
+
+    .info-item {
+      text-align: center;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #ccc;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .info-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ffd700;
+    }
+
+    .guess-history {
+      margin-top: 25px;
+    }
+
+    .guess-item {
+      margin-bottom: 15px;
+      padding: 15px;
+      background: #1a1a1a;
+      border: 2px solid #ffd700;
+      border-radius: 8px;
+    }
+
+    .guess-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .guess-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffd700;
+    }
+
+    .guess-year {
+      font-size: 12px;
+      color: #ccc;
+      background: #2d2d2d;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .feedback-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+    }
+
+    .feedback-box {
+      padding: 8px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 13px;
+      color: #000;
+      border: 2px solid transparent;
+    }
+
+    .green { 
+      background: #ffd700;
+      border-color: #ffd700;
+    }
+    
+    .yellow { 
+      background: #ffeb3b;
+      border-color: #ffeb3b;
+    }
+    
+    .gray { 
+      background: #666;
+      color: #fff;
+      border-color: #666;
+    }
+
+    .feedback-labels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .feedback-label {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #ffd700;
+    }
+
+    .result-message {
+      margin-top: 25px;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      border: 2px solid;
+    }
+
+    .win-message {
+      background: #1a1a1a;
+      color: #ffd700;
+      border-color: #ffd700;
+    }
+
+    .lose-message {
+      background: #2d1a1a;
+      color: #ff6b6b;
+      border-color: #ff6b6b;
+    }
+
+    .target-reveal {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(255, 215, 0, 0.1);
+      border-radius: 6px;
+      font-size: 14px;
+      color: #ffd700;
+    }
+
+    .movie-list {
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 10px;
+      border: 1px solid #ffd700;
+      border-radius: 8px;
+      margin-top: 10px;
+      background: #2d2d2d;
+    }
+
+    .movie-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .movie-list::-webkit-scrollbar-track {
+      background: #1a1a1a;
+      border-radius: 8px;
+    }
+
+    .movie-list::-webkit-scrollbar-thumb {
+      background: #ffd700;
+      border-radius: 8px;
+    }
+
+    .movie-list ul {
+      columns: 2;
+      column-gap: 20px;
+      list-style-type: disc;
+      padding-left: 20px;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .logo-text {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ffd700;
+      text-decoration: none;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 2px solid #ffd700;
+      transition: all 0.3s ease;
+      z-index: 999;
+    }
+
+    .logo-text:hover {
+      background: #ffd700;
+      color: #000;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .game-container {
+        padding: 20px;
+        margin: 10px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      .game-info {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .feedback-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .feedback-labels {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .settings-content {
+        padding: 20px;
+        width: 95%;
+      }
+
+      .movie-list ul {
+        columns: 1;
+      }
+    }
+
+    @media (max-width: 500px) {
+      h1 {
+        font-size: 1.6rem;
+      }
+
+      .subtitle {
+        font-size: 0.9rem;
+      }
+
+      .guess-button,
+      .new-game-button {
+        font-size: 14px;
+        padding: 10px;
+      }
+
+      .settings-title {
+        font-size: 18px;
+      }
+
+      .info-value {
+        font-size: 18px;
+      }
+
+      .feedback-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .feedback-labels {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="LiamsHome.html" class="logo-text">🎬 Movierdle</a>
+  <div class="game-container">
+    <button class="settings-button" onclick="openSettings()">⚙️</button>
+    
+    <h1>🎬 Movierdle</h1>
+    <p class="subtitle">Guess the mystery movie! Search by title or director</p>
+
+    <div class="game-info">
+      <div class="info-item">
+        <div class="info-label">Guesses Left</div>
+        <div class="info-value" id="guessesLeft">5</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Total Guesses</div>
+        <div class="info-value" id="totalGuesses">0</div>
+      </div>
+    </div>
+
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="searchInput" 
+        class="search-input" 
+        placeholder="Search by movie title or director name..." 
+        autocomplete="off"
+      />
+      <div class="suggestions" id="suggestions"></div>
+    </div>
+
+    <div class="controls">
+      <button class="guess-button" id="guessButton" onclick="submitGuess()">Make Guess</button>
+      <button class="new-game-button" onclick="newGame()">New Game</button>
+    </div>
+
+    <div class="guess-history" id="guessHistory"></div>
+    <div id="result"></div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="settings-modal" id="settingsModal">
+    <div class="settings-content">
+      <div class="settings-header">
+        <h3 class="settings-title">Game Settings</h3>
+        <button class="close-button" onclick="closeSettings()">×</button>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">Number of Guesses:</label>
+        <div class="guess-options">
+          <div class="guess-option" onclick="setMaxGuesses(3)">3 (Hard)</div>
+          <div class="guess-option active" onclick="setMaxGuesses(5)">5 (Normal)</div>
+          <div class="guess-option" onclick="setMaxGuesses(10)">10 (Easy)</div>
+          <div class="guess-option" onclick="setMaxGuesses(999)">Unlimited</div>
+        </div>
+      </div>
+
+      <div class="instructions">
+        <strong>🟨 Gold:</strong> Exact match<br>
+        <strong>🟡 Yellow:</strong> Close (same decade/genre/similar rating)<br>
+        <strong>⬆️ Higher:</strong> Your guess is lower than the target<br>
+        <strong>⬇️ Lower:</strong> Your guess is higher than the target
+        <br><br>
+        Try to guess the mystery movie by analyzing the feedback from each guess!
+        <br><br>
+        Movies in the game:
+        <div class="movie-list">
+          <ul>
+            <li>The Godfather (1972)</li>
+            <li>The Dark Knight (2008)</li>
+            <li>Pulp Fiction (1994)</li>
+            <li>Forrest Gump (1994)</li>
+            <li>The Matrix (1999)</li>
+            <li>Goodfellas (1990)</li>
+            <li>Inception (2010)</li>
+            <li>Fight Club (1999)</li>
+            <li>The Shawshank Redemption (1994)</li>
+            <li>Interstellar (2014)</li>
+            <li>The Wolf of Wall Street (2013)</li>
+            <li>Django Unchained (2012)</li>
+            <li>Inglourious Basterds (2009)</li>
+            <li>The Avengers (2012)</li>
+            <li>Iron Man (2008)</li>
+            <li>Spider-Man (2002)</li>
+            <li>The Lion King (1994)</li>
+            <li>Toy Story (1995)</li>
+            <li>Finding Nemo (2003)</li>
+            <li>Avatar (2009)</li>
+            <li>Titanic (1997)</li>
+            <li>Jurassic Park (1993)</li>
+            <li>Back to the Future (1985)</li>
+            <li>Raiders of the Lost Ark (1981)</li>
+            <li>Star Wars: A New Hope (1977)</li>
+            <li>The Empire Strikes Back (1980)</li>
+            <li>Return of the Jedi (1983)</li>
+            <li>E.T. the Extra-Terrestrial (1982)</li>
+            <li>Jaws (1975)</li>
+            <li>The Terminator (1984)</li>
+            <li>Aliens (1986)</li>
+            <li>Blade Runner (1982)</li>
+            <li>Casablanca (1942)</li>
+            <li>Gone with the Wind (1939)</li>
+            <li>The Wizard of Oz (1939)</li>
+            <li>Citizen Kane (1941)</li>
+            <li>Vertigo (1958)</li>
+            <li>Psycho (1960)</li>
+            <li>North by Northwest (1959)</li>
+            <li>Singin' in the Rain (1952)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const movies = [
+      {
+        title: "The Godfather",
+        year: 1972,
+        genre: "Crime",
+        director: "Francis Ford Coppola",
+        mainActor: "Marlon Brando",
+        imdbRating: 9.2
+      },
+      {
+        title: "The Dark Knight",
+        year: 2008,
+        genre: "Action",
+        director: "Christopher Nolan",
+        mainActor: "Christian Bale",
+        imdbRating: 9.0
+      },
+      {
+        title: "Pulp Fiction",
+        year: 1994,
+        genre: "Crime",
+        director: "Quentin Tarantino",
+        mainActor: "John Travolta",
+        imdbRating: 8.9
+      },
+      {
+        title: "Forrest Gump",
+        year: 1994,
+        genre: "Drama",
+        director: "Robert Zemeckis",
+        mainActor: "Tom Hanks",
+        imdbRating: 8.8
+      },
+      {
+        title: "The Matrix",
+        year: 1999,
+        genre: "Sci-Fi",
+        director: "The Wachowskis",
+        mainActor: "Keanu Reeves",
+        imdbRating: 8.7
+      },
+      {
+        title: "Goodfellas",
+        year: 1990,
+        genre: "Crime",
+        director: "Martin Scorsese",
+        mainActor: "Robert De Niro",
+        imdbRating: 8.7
+      },
+      {
+        title: "Inception",
+        year: 2010,
+        genre: "Sci-Fi",
+        director: "Christopher Nolan",
+        mainActor: "Leonardo DiCaprio",
+        imdbRating: 8.8
+      },
+      {
+        title: "Fight Club",
+        year: 1999,
+        genre: "Drama",
+        director: "David Fincher",
+        mainActor: "Brad Pitt",
+        imdbRating: 8.8
+      },
+      {
+        title: "The Shawshank Redemption",
+        year: 1994,
+        genre: "Drama",
+        director: "Frank Darabont",
+        mainActor: "Tim Robbins",
+        imdbRating: 9.3
+      },
+      {
+        title: "Interstellar",
+        year: 2014,
+        genre: "Sci-Fi",
+        director: "Christopher Nolan",
+        mainActor: "Matthew McConaughey",
+        imdbRating: 8.6
+      },
+      {
+        title: "The Wolf of Wall Street",
+        year: 2013,
+        genre: "Biography",
+        director: "Martin Scorsese",
+        mainActor: "Leonardo DiCaprio",
+        imdbRating: 8.2
+      },
+      {
+        title: "Django Unchained",
+        year: 2012,
+        genre: "Western",
+        director: "Quentin Tarantino",
+        mainActor: "Jamie Foxx",
+        imdbRating: 8.4
+      },
+      {
+        title: "Inglourious Basterds",
+        year: 2009,
+        genre: "War",
+        director: "Quentin Tarantino",
+        mainActor: "Brad Pitt",
+        imdbRating: 8.3
+      },
+      {
+        title: "The Avengers",
+        year: 2012,
+        genre: "Action",
+        director: "Joss Whedon",
+        mainActor: "Robert Downey Jr.",
+        imdbRating: 8.0
+      },
+      {
+        title: "Iron Man",
+        year: 2008,
+        genre: "Action",
+        director: "Jon Favreau",
+        mainActor: "Robert Downey Jr.",
+        imdbRating: 7.9
+      },
+      {
+        title: "Spider-Man",
+        year: 2002,
+        genre: "Action",
+        director: "Sam Raimi",
+        mainActor: "Tobey Maguire",
+        imdbRating: 7.4
+      },
+      {
+        title: "The Lion King",
+        year: 1994,
+        genre: "Animation",
+        director: "Roger Allers",
+        mainActor: "Matthew Broderick",
+        imdbRating: 8.5
+      },
+      {
+        title: "Toy Story",
+        year: 1995,
+        genre: "Animation",
+        director: "John Lasseter",
+        mainActor: "Tom Hanks",
+        imdbRating: 8.3
+      },
+      {
+        title: "Finding Nemo",
+        year: 2003,
+        genre: "Animation",
+        director: "Andrew Stanton",
+        mainActor: "Albert Brooks",
+        imdbRating: 8.2
+      },
+      {
+        title: "Avatar",
+        year: 2009,
+        genre: "Sci-Fi",
+        director: "James Cameron",
+        mainActor: "Sam Worthington",
+        imdbRating: 7.9
+      },
+      {
+        title: "Titanic",
+        year: 1997,
+        genre: "Romance",
+        director: "James Cameron",
+        mainActor: "Leonardo DiCaprio",
+        imdbRating: 7.9
+      },
+      {
+        title: "Jurassic Park",
+        year: 1993,
+        genre: "Adventure",
+        director: "Steven Spielberg",
+        mainActor: "Sam Neill",
+        imdbRating: 8.2
+      },
+      {
+        title: "Back to the Future",
+        year: 1985,
+        genre: "Adventure",
+        director: "Robert Zemeckis",
+        mainActor: "Michael J. Fox",
+        imdbRating: 8.5
+      },
+      {
+        title: "Raiders of the Lost Ark",
+        year: 1981,
+        genre: "Adventure",
+        director: "Steven Spielberg",
+        mainActor: "Harrison Ford",
+        imdbRating: 8.5
+      },
+      {
+        title: "Star Wars: A New Hope",
+        year: 1977,
+        genre: "Sci-Fi",
+        director: "George Lucas",
+        mainActor: "Mark Hamill",
+        imdbRating: 8.6
+      },
+      {
+        title: "The Empire Strikes Back",
+        year: 1980,
+        genre: "Sci-Fi",
+        director: "Irvin Kershner",
+        mainActor: "Mark Hamill",
+        imdbRating: 8.7
+      },
+      {
+        title: "Return of the Jedi",
+        year: 1983,
+        genre: "Sci-Fi",
+        director: "Richard Marquand",
+        mainActor: "Mark Hamill",
+        imdbRating: 8.3
+      },
+      {
+        title: "E.T. the Extra-Terrestrial",
+        year: 1982,
+        genre: "Family",
+        director: "Steven Spielberg",
+        mainActor: "Henry Thomas",
+        imdbRating: 7.9
+      },
+      {
+        title: "Jaws",
+        year: 1975,
+        genre: "Thriller",
+        director: "Steven Spielberg",
+        mainActor: "Roy Scheider",
+        imdbRating: 8.1
+      },
+      {
+        title: "The Terminator",
+        year: 1984,
+        genre: "Sci-Fi",
+        director: "James Cameron",
+        mainActor: "Arnold Schwarzenegger",
+        imdbRating: 8.1
+      },
+      {
+        title: "Aliens",
+        year: 1986,
+        genre: "Sci-Fi",
+        director: "James Cameron",
+        mainActor: "Sigourney Weaver",
+        imdbRating: 8.4
+      },
+      {
+        title: "Blade Runner",
+        year: 1982,
+        genre: "Sci-Fi",
+        director: "Ridley Scott",
+        mainActor: "Harrison Ford",
+        imdbRating: 8.1
+      },
+      {
+        title: "Casablanca",
+        year: 1942,
+        genre: "Romance",
+        director: "Michael Curtiz",
+        mainActor: "Humphrey Bogart",
+        imdbRating: 8.5
+      },
+      {
+        title: "Gone with the Wind",
+        year: 1939,
+        genre: "Romance",
+        director: "Victor Fleming",
+        mainActor: "Clark Gable",
+        imdbRating: 8.2
+      },
+      {
+        title: "The Wizard of Oz",
+        year: 1939,
+        genre: "Family",
+        director: "Victor Fleming",
+        mainActor: "Judy Garland",
+        imdbRating: 8.1
+      },
+      {
+        title: "Citizen Kane",
+        year: 1941,
+        genre: "Drama",
+        director: "Orson Welles",
+        mainActor: "Orson Welles",
+        imdbRating: 8.3
+      },
+      {
+        title: "Vertigo",
+        year: 1958,
+        genre: "Thriller",
+        director: "Alfred Hitchcock",
+        mainActor: "James Stewart",
+        imdbRating: 8.3
+      },
+      {
+        title: "Psycho",
+        year: 1960,
+        genre: "Thriller",
+        director: "Alfred Hitchcock",
+        mainActor: "Anthony Perkins",
+        imdbRating: 8.5
+      },
+      {
+        title: "North by Northwest",
+        year: 1959,
+        genre: "Thriller",
+        director: "Alfred Hitchcock",
+        mainActor: "Cary Grant",
+        imdbRating: 8.3
+      },
+      {
+        title: "Singin' in the Rain",
+        year: 1952,
+        genre: "Musical",
+        director: "Stanley Donen",
+        mainActor: "Gene Kelly",
+        imdbRating: 8.3
+      }
+    ];
+
+    let currentMovie = null;
+    let guesses = [];
+    let maxGuesses = 5;
+    let gameOver = false;
+
+    function initGame() {
+      currentMovie = movies[Math.floor(Math.random() * movies.length)];
+      guesses = [];
+      gameOver = false;
+      updateDisplay();
+      document.getElementById('searchInput').disabled = false;
+      document.getElementById('guessButton').disabled = false;
+      document.getElementById('result').innerHTML = '';
+      document.getElementById('guessHistory').innerHTML = '';
+    }
+
+    function updateDisplay() {
+      document.getElementById('guessesLeft').textContent = maxGuesses - guesses.length;
+      document.getElementById('totalGuesses').textContent = guesses.length;
+    }
+
+    function searchMovies() {
+      const input = document.getElementById('searchInput').value.toLowerCase();
+      const suggestions = document.getElementById('suggestions');
+      
+      if (input.length < 2) {
+        suggestions.style.display = 'none';
+        return;
+      }
+
+      const matches = movies.filter(movie => 
+        movie.title.toLowerCase().includes(input) || 
+        movie.director.toLowerCase().includes(input)
+      );
+
+      if (matches.length > 0) {
+        suggestions.innerHTML = matches.map(movie => 
+          `<div class="suggestion-item" onclick="selectMovie('${movie.title}')">${movie.title} (${movie.year}) - ${movie.director}</div>`
+        ).join('');
+        suggestions.style.display = 'block';
+      } else {
+        suggestions.style.display = 'none';
+      }
+    }
+
+    function selectMovie(title) {
+      document.getElementById('searchInput').value = title;
+      document.getElementById('suggestions').style.display = 'none';
+    }
+
+    function submitGuess() {
+      const searchInput = document.getElementById('searchInput');
+      const guessTitle = searchInput.value.trim();
+      
+      if (!guessTitle || gameOver) return;
+
+      const guessedMovie = movies.find(movie => 
+        movie.title.toLowerCase() === guessTitle.toLowerCase()
+      );
+
+      if (!guessedMovie) {
+        alert('Please select a movie from the suggestions!');
+        return;
+      }
+
+      guesses.push(guessedMovie);
+      searchInput.value = '';
+      document.getElementById('suggestions').style.display = 'none';
+
+      displayGuess(guessedMovie);
+      updateDisplay();
+
+      if (guessedMovie.title === currentMovie.title) {
+        endGame(true);
+      } else if (guesses.length >= maxGuesses) {
+        endGame(false);
+      }
+    }
+
+    function displayGuess(guessedMovie) {
+      const historyDiv = document.getElementById('guessHistory');
+      const guessDiv = document.createElement('div');
+      guessDiv.className = 'guess-item';
+
+      const feedback = getFeedback(guessedMovie, currentMovie);
+      
+      guessDiv.innerHTML = `
+        <div class="guess-header">
+          <span class="guess-name">${guessedMovie.title}</span>
+          <span class="guess-year">${guessedMovie.year}</span>
+        </div>
+        <div class="feedback-labels">
+          <div class="feedback-label">Year</div>
+          <div class="feedback-label">Genre</div>
+          <div class="feedback-label">Director</div>
+          <div class="feedback-label">Actor</div>
+          <div class="feedback-label">Rating</div>
+        </div>
+        <div class="feedback-grid">
+          <div class="feedback-box ${feedback.year.class}">${feedback.year.text}</div>
+          <div class="feedback-box ${feedback.genre.class}">${feedback.genre.text}</div>
+          <div class="feedback-box ${feedback.director.class}">${feedback.director.text}</div>
+          <div class="feedback-box ${feedback.mainActor.class}">${feedback.mainActor.text}</div>
+          <div class="feedback-box ${feedback.rating.class}">${feedback.rating.text}</div>
+        </div>
+      `;
+
+      historyDiv.appendChild(guessDiv);
+    }
+
+    function getFeedback(guess, target) {
+      return {
+        year: getYearFeedback(guess.year, target.year),
+        genre: getGenreFeedback(guess.genre, target.genre),
+        director: getDirectorFeedback(guess.director, target.director),
+        mainActor: getActorFeedback(guess.mainActor, target.mainActor),
+        rating: getRatingFeedback(guess.imdbRating, target.imdbRating)
+      };
+    }
+
+    function getYearFeedback(guessYear, targetYear) {
+      if (guessYear === targetYear) {
+        return { class: 'green', text: guessYear };
+      } else if (Math.abs(guessYear - targetYear) <= 10) {
+        return { class: 'yellow', text: guessYear };
+      } else {
+        const arrow = guessYear < targetYear ? '⬆️' : '⬇️';
+        return { class: 'gray', text: `${guessYear} ${arrow}` };
+      }
+    }
+
+    function getGenreFeedback(guessGenre, targetGenre) {
+      if (guessGenre === targetGenre) {
+        return { class: 'green', text: guessGenre };
+      } else {
+        return { class: 'gray', text: guessGenre };
+      }
+    }
+
+    function getDirectorFeedback(guessDirector, targetDirector) {
+      if (guessDirector === targetDirector) {
+        return { class: 'green', text: guessDirector };
+      } else {
+        return { class: 'gray', text: guessDirector };
+      }
+    }
+
+    function getActorFeedback(guessActor, targetActor) {
+      if (guessActor === targetActor) {
+        return { class: 'green', text: guessActor };
+      } else {
+        return { class: 'gray', text: guessActor };
+      }
+    }
+
+    function getRatingFeedback(guessRating, targetRating) {
+      if (Math.abs(guessRating - targetRating) <= 0.1) {
+        return { class: 'green', text: guessRating };
+      } else if (Math.abs(guessRating - targetRating) <= 0.5) {
+        return { class: 'yellow', text: guessRating };
+      } else {
+        const arrow = guessRating < targetRating ? '⬆️' : '⬇️';
+        return { class: 'gray', text: `${guessRating} ${arrow}` };
+      }
+    }
+
+    function endGame(won) {
+      gameOver = true;
+      document.getElementById('searchInput').disabled = true;
+      document.getElementById('guessButton').disabled = true;
+      
+      const resultDiv = document.getElementById('result');
+      if (won) {
+        resultDiv.innerHTML = `
+          <div class="result-message win-message">
+            🎉 Congratulations! You guessed it in ${guesses.length} ${guesses.length === 1 ? 'guess' : 'guesses'}!
+            <div class="target-reveal">The movie was: ${currentMovie.title} (${currentMovie.year})</div>
+          </div>
+        `;
+      } else {
+        resultDiv.innerHTML = `
+          <div class="result-message lose-message">
+            😞 Game Over! You've used all your guesses.
+            <div class="target-reveal">The movie was: ${currentMovie.title} (${currentMovie.year})</div>
+          </div>
+        `;
+      }
+    }
+
+    function newGame() {
+      initGame();
+    }
+
+    function openSettings() {
+      document.getElementById('settingsModal').style.display = 'block';
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    function setMaxGuesses(num) {
+      maxGuesses = num;
+      document.querySelectorAll('.guess-option').forEach(option => {
+        option.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      updateDisplay();
+    }
+
+    // Event listeners
+    document.getElementById('searchInput').addEventListener('input', searchMovies);
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        submitGuess();
+      }
+    });
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-container')) {
+        document.getElementById('suggestions').style.display = 'none';
+      }
+    });
+
+    // Close settings modal when clicking outside
+    document.getElementById('settingsModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeSettings();
+      }
+    });
+
+    // Initialize game on page load
+    window.addEventListener('load', initGame);
+  </script>
+</body>
+</html>
