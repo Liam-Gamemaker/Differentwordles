@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guessing Games Hub</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f8fafc, #e3f2fd);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      color: #2c3e50;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    .emoji {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .card p {
+      font-size: 1rem;
+      color: #666;
+    }
+
+    @media (max-width: 500px) {
+      h1 {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Guessing Games Hub</h1>
+
+  <div class="game-grid">
+    <a class="card" href="ballerdle.html">
+      <div class="emoji">🏀</div>
+      <h2>Ballerdle</h2>
+      <p>Guess the mystery NBA player using clues like height, age, and team!</p>
+    </a>
+
+    <a class="card" href="cuberle.html">
+      <div class="emoji">🧩</div>
+      <h2>Cuberle</h2>
+      <p>Can you guess the WCA cuber? Use clues like PR, year started, and world rank.</p>
+    </a>
+
+    <a class="card" href="tuberdle.html">
+      <div class="emoji">🎥</div>
+      <h2>Tuberdle</h2>
+      <p>Guess the mystery YouTuber by analyzing subscriber count, content, and more!</p>
+    </a>
+  </div>
+</body>
+</html>

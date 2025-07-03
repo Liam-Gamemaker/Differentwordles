@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NBA Player Guessing Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #FF6B35 0%, #F7941D 50%, #004274 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .game-container {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    h1 {
+      color: #004274;
+      font-size: 2.2rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #7f8c8d;
+      margin-bottom: 25px;
+      font-size: 1rem;
+    }
+
+    .settings-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+
+    .settings-button:hover {
+      background: #e9ecef;
+      transform: rotate(90deg);
+    }
+
+    .settings-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+    }
+
+    .settings-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .settings-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #004274;
+    }
+
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #7f8c8d;
+      padding: 5px;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-button:hover {
+      background: #f8f9fa;
+      color: #004274;
+    }
+
+    .setting-group {
+      margin-bottom: 20px;
+    }
+
+    .setting-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #004274;
+    }
+
+    .guess-options {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .guess-option {
+      padding: 8px 16px;
+      border: 2px solid #bdc3c7;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
+    .guess-option:hover {
+      border-color: #FF6B35;
+    }
+
+    .guess-option.active {
+      background: #FF6B35;
+      color: white;
+      border-color: #FF6B35;
+    }
+
+    .instructions {
+      padding: 15px;
+      background: #fff3e0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #004274;
+      line-height: 1.6;
+    }
+
+    .instructions strong {
+      color: #FF6B35;
+    }
+
+    .player-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px;
+    }
+
+    .player-list ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      columns: 2;
+      column-gap: 20px;
+    }
+
+    .player-list li {
+      margin-bottom: 5px;
+      padding: 2px 0;
+      font-size: 13px;
+      break-inside: avoid;
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 2px solid #bdc3c7;
+      border-radius: 8px;
+      background: white;
+      transition: border-color 0.3s ease;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: #FF6B35;
+    }
+
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #bdc3c7;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .suggestion-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    .suggestion-item:hover {
+      background-color: #f8f9fa;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .guess-button {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      background: #FF6B35;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .guess-button:hover:not(:disabled) {
+      background: #e55a2b;
+    }
+
+    .guess-button:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    .new-game-button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border: 2px solid #004274;
+      border-radius: 8px;
+      background: white;
+      color: #004274;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .new-game-button:hover {
+      background: #004274;
+      color: white;
+    }
+
+    .game-info {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 25px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .info-item {
+      text-align: center;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #7f8c8d;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .info-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #004274;
+    }
+
+    .guess-history {
+      margin-top: 25px;
+    }
+
+    .guess-item {
+      margin-bottom: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #ecf0f1;
+    }
+
+    .guess-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .guess-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #004274;
+    }
+
+    .guess-team {
+      font-size: 12px;
+      color: #7f8c8d;
+      background: white;
+      padding: 3px 6px;
+      border-radius: 4px;
+    }
+
+    .feedback-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 8px;
+    }
+
+    .feedback-box {
+      padding: 8px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 13px;
+      color: white;
+    }
+
+    .green { 
+      background: #27ae60;
+    }
+    
+    .yellow { 
+      background: #f39c12;
+    }
+    
+    .gray { 
+      background: #95a5a6;
+    }
+
+    .feedback-labels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .feedback-label {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #7f8c8d;
+    }
+
+    .result-message {
+      margin-top: 25px;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .win-message {
+      background: #d5edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .lose-message {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .target-reveal {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .game-container {
+        padding: 20px;
+        margin: 10px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      .game-info {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .feedback-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .feedback-labels {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .settings-content {
+        padding: 20px;
+        width: 95%;
+      }
+
+      .player-list ul {
+        columns: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <button class="settings-button" onclick="openSettings()">⚙️</button>
+    
+    <h1>🏀 NBA Player Guessing Game</h1>
+    <p class="subtitle">Guess the mystery NBA player! Enter a player name</p>
+
+    <div class="game-info">
+      <div class="info-item">
+        <div class="info-label">Guesses Left</div>
+        <div class="info-value" id="guessesLeft">6</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Total Guesses</div>
+        <div class="info-value" id="totalGuesses">0</div>
+      </div>
+    </div>
+
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="searchInput" 
+        class="search-input" 
+        placeholder="Search by player name (e.g., LeBron James, Stephen Curry)" 
+        autocomplete="off"
+      />
+      <div class="suggestions" id="suggestions"></div>
+    </div>
+
+    <div class="controls">
+      <button class="guess-button" id="guessButton" onclick="submitGuess()">Make Guess</button>
+      <button class="new-game-button" onclick="newGame()">New Game</button>
+    </div>
+
+    <div class="guess-history" id="guessHistory"></div>
+    <div id="result"></div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="settings-modal" id="settingsModal">
+    <div class="settings-content">
+      <div class="settings-header">
+        <h3 class="settings-title">Game Settings</h3>
+        <button class="close-button" onclick="closeSettings()">×</button>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">Number of Guesses:</label>
+        <div class="guess-options">
+          <div class="guess-option" onclick="setMaxGuesses(3)">3 (Hard)</div>
+          <div class="guess-option active" onclick="setMaxGuesses(6)">6 (Normal)</div>
+          <div class="guess-option" onclick="setMaxGuesses(10)">10 (Easy)</div>
+          <div class="guess-option" onclick="setMaxGuesses(999)">Unlimited</div>
+        </div>
+      </div>
+
+      <div class="instructions">
+        <strong>🟢 Green:</strong> Exact match<br>
+        <strong>🟡 Yellow:</strong> Close (within range)<br>
+        <strong>⬆️ Higher:</strong> Your guess is lower than the target<br>
+        <strong>⬇️ Lower:</strong> Your guess is higher than the target
+        <br><br>
+        <strong>Yellow Ranges:</strong><br>
+        • Height: Within 2 inches<br>
+        • Age: Within 3 years<br>
+        • PPG: Within 3 points<br>
+        • Jersey: Within 10 numbers
+        <br><br>
+        Try to guess the mystery NBA player by analyzing the feedback from each guess!
+        
+        <div class="player-list">
+          <strong>Available Players:</strong>
+          <ul>
+            <li>LeBron James</li>
+            <li>Stephen Curry</li>
+            <li>Kevin Durant</li>
+            <li>Giannis Antetokounmpo</li>
+            <li>Luka Dončić</li>
+            <li>Jayson Tatum</li>
+            <li>Jimmy Butler</li>
+            <li>Joel Embiid</li>
+            <li>Nikola Jokić</li>
+            <li>Damian Lillard</li>
+            <li>Kawhi Leonard</li>
+            <li>Paul George</li>
+            <li>Russell Westbrook</li>
+            <li>Chris Paul</li>
+            <li>James Harden</li>
+            <li>Kyrie Irving</li>
+            <li>Anthony Davis</li>
+            <li>Devin Booker</li>
+            <li>Donovan Mitchell</li>
+            <li>Trae Young</li>
+            <li>Ja Morant</li>
+            <li>Zion Williamson</li>
+            <li>Anthony Edwards</li>
+            <li>Shai Gilgeous-Alexander</li>
+            <li>Tyrese Haliburton</li>
+            <li>Paolo Banchero</li>
+            <li>Victor Wembanyama</li>
+            <li>Scottie Barnes</li>
+            <li>LaMelo Ball</li>
+            <li>Tyler Herro</li>
+            <li>Jalen Green</li>
+            <li>Franz Wagner</li>
+            <li>Alperen Şengün</li>
+            <li>Cade Cunningham</li>
+            <li>Evan Mobley</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const players = [
+      {
+        name: "LeBron James",
+        team: "Lakers",
+        height: 81, // 6'9" in inches
+        age: 40,
+        ppg: 23.2,
+        jersey: 23
+      },
+      {
+        name: "Stephen Curry",
+        team: "Warriors",
+        height: 75, // 6'3"
+        age: 36,
+        ppg: 24.8,
+        jersey: 30
+      },
+      {
+        name: "Kevin Durant",
+        team: "Suns",
+        height: 83, // 6'11"
+        age: 36,
+        ppg: 25.8,
+        jersey: 35
+      },
+      {
+        name: "Giannis Antetokounmpo",
+        team: "Bucks",
+        height: 83, // 6'11"
+        age: 30,
+        ppg: 30.4,
+        jersey: 34
+      },
+      {
+        name: "Luka Dončić",
+        team: "Mavericks",
+        height: 79, // 6'7"
+        age: 25,
+        ppg: 28.1,
+        jersey: 77
+      },
+      {
+        name: "Jayson Tatum",
+        team: "Celtics",
+        height: 80, // 6'8"
+        age: 26,
+        ppg: 26.9,
+        jersey: 0
+      },
+      {
+        name: "Jimmy Butler",
+        team: "Heat",
+        height: 79, // 6'7"
+        age: 35,
+        ppg: 20.8,
+        jersey: 22
+      },
+      {
+        name: "Joel Embiid",
+        team: "76ers",
+        height: 84, // 7'0"
+        age: 30,
+        ppg: 27.5,
+        jersey: 21
+      },
+      {
+        name: "Nikola Jokić",
+        team: "Nuggets",
+        height: 83, // 6'11"
+        age: 30,
+        ppg: 24.2,
+        jersey: 15
+      },
+      {
+        name: "Damian Lillard",
+        team: "Bucks",
+        height: 75, // 6'3"
+        age: 34,
+        ppg: 25.7,
+        jersey: 0
+      },
+      {
+        name: "Kawhi Leonard",
+        team: "Clippers",
+        height: 79, // 6'7"
+        age: 33,
+        ppg: 23.7,
+        jersey: 2
+      },
+      {
+        name: "Paul George",
+        team: "Clippers",
+        height: 80, // 6'8"
+        age: 34,
+        ppg: 22.6,
+        jersey: 13
+      },
+      {
+        name: "Russell Westbrook",
+        team: "Nuggets",
+        height: 75, // 6'3"
+        age: 36,
+        ppg: 12.6,
+        jersey: 4
+      },
+      {
+        name: "Chris Paul",
+        team: "Warriors",
+        height: 72, // 6'0"
+        age: 39,
+        ppg: 9.2,
+        jersey: 3
+      },
+      {
+        name: "James Harden",
+        team: "Clippers",
+        height: 77, // 6'5"
+        age: 35,
+        ppg: 16.6,
+        jersey: 1
+      },
+      {
+        name: "Kyrie Irving",
+        team: "Mavericks",
+        age: 32,
+        height: 74, // 6'2"
+        ppg: 25.6,
+        jersey: 11
+      },
+      {
+        name: "Anthony Davis",
+        team: "Lakers",
+        height: 82, // 6'10"
+        age: 31,
+        ppg: 24.1,
+        jersey: 3
+      },
+      {
+        name: "Devin Booker",
+        team: "Suns",
+        height: 78, // 6'6"
+        age: 28,
+        ppg: 27.1,
+        jersey: 1
+      },
+      {
+        name: "Donovan Mitchell",
+        team: "Cavaliers",
+        height: 75, // 6'3"
+        age: 28,
+        ppg: 26.6,
+        jersey: 45
+      },
+      {
+        name: "Trae Young",
+        team: "Hawks",
+        height: 73, // 6'1"
+        age: 26,
+        ppg: 25.7,
+        jersey: 11
+      },
+      {
+        name: "Ja Morant",
+        team: "Grizzlies",
+        height: 75, // 6'3"
+        age: 25,
+        ppg: 25.1,
+        jersey: 12
+      },
+      {
+        name: "Zion Williamson",
+        team: "Pelicans",
+        height: 79, // 6'7"
+        age: 24,
+        ppg: 22.9,
+        jersey: 1
+      },
+      {
+        name: "Anthony Edwards",
+        team: "Timberwolves",
+        height: 76, // 6'4"
+        age: 23,
+        ppg: 25.9,
+        jersey: 5
+      },
+      {
+        name: "Shai Gilgeous-Alexander",
+        team: "Thunder",
+        height: 78, // 6'6"
+        age: 26,
+        ppg: 30.3,
+        jersey: 2
+      },
+      {
+        name: "Tyrese Haliburton",
+        team: "Pacers",
+        height: 77, // 6'5"
+        age: 24,
+        ppg: 20.1,
+        jersey: 0
+      },
+      {
+        name: "Paolo Banchero",
+        team: "Magic",
+        height: 82, // 6'10"
+        age: 21,
+        ppg: 22.6,
+        jersey: 5
+      },
+      {
+        name: "Victor Wembanyama",
+        team: "Spurs",
+        height: 88, // 7'4"
+        age: 21,
+        ppg: 21.4,
+        jersey: 1
+      },
+      {
+        name: "Scottie Barnes",
+        team: "Raptors",
+        height: 80, // 6'8"
+        age: 23,
+        ppg: 19.9,
+        jersey: 4
+      },
+      {
+        name: "LaMelo Ball",
+        team: "Hornets",
+        height: 79, // 6'7"
+        age: 23,
+        ppg: 28.7,
+        jersey: 1
+      },
+      {
+        name: "Tyler Herro",
+        team: "Heat",
+        height: 77, // 6'5"
+        age: 25,
+        ppg: 23.1,
+        jersey: 14
+      },
+      {
+        name: "Jalen Green",
+        team: "Rockets",
+        height: 78, // 6'6"
+        age: 23,
+        ppg: 19.6,
+        jersey: 4
+      },
+      {
+        name: "Franz Wagner",
+        team: "Magic",
+        height: 82, // 6'10"
+        age: 23,
+        ppg: 24.4,
+        jersey: 22
+      },
+      {
+        name: "Alperen Şengün",
+        team: "Rockets",
+        height: 82, // 6'10"
+        age: 22,
+        ppg: 16.8,
+        jersey: 28
+      },
+      {
+        name: "Cade Cunningham",
+        team: "Pistons",
+        height: 79, // 6'7"
+        age: 23,
+        ppg: 24.5,
+        jersey: 2
+      },
+      {
+        name: "Evan Mobley",
+        team: "Cavaliers",
+        height: 83, // 6'11"
+        age: 23,
+        ppg: 15.7,
+        jersey: 4
+      }
+    ];
+
+    let target = null;
+    let guessCount = 0;
+    let maxGuesses = 6;
+    let gameOver = false;
+    let guessHistory = [];
+
+    function initGame() {
+      target = players[Math.floor(Math.random() * players.length)];
+      guessCount = 0;
+      gameOver = false;
+      guessHistory = [];
+      updateGameInfo();
+      document.getElementById('guessHistory').innerHTML = '';
+      document.getElementById('result').innerHTML = '';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchInput').disabled = false;
+      document.getElementById('guessButton').disabled = false;
+      hideSuggestions();
+    }
+
+    function updateGameInfo() {
+      if (maxGuesses === 999) {
+        document.getElementById('guessesLeft').textContent = '∞';
+      } else {
+        document.getElementById('guessesLeft').textContent = maxGuesses - guessCount;
+      }
+      document.getElementById('totalGuesses').textContent = guessCount;
+    }
+
+    function openSettings() {
+      document.getElementById('settingsModal').style.display = 'block';
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    function setMaxGuesses(newMax) {
+      maxGuesses = newMax;
+      
+      // Update active button
+      document.querySelectorAll('.guess-option').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // Update display
+      updateGameInfo();
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('settingsModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeSettings();
+      }
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const suggestionsDiv = document.getElementById('suggestions');
+
+    searchInput.addEventListener('input', function(e) {
+      const query = e.target.value.toLowerCase().trim();
+      
+      if (query.length === 0) {
+        hideSuggestions();
+        return;
+      }
+
+      const matches = players.filter(player => 
+        player.name.toLowerCase().includes(query)
+      ).slice(0, 10);
+
+      if (matches.length > 0) {
+        showSuggestions(matches);
+      } else {
+        hideSuggestions();
+      }
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        submitGuess();
+      }
+    });
+
+    function showSuggestions(matches) {
+      suggestionsDiv.innerHTML = '';
+      matches.forEach(player => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.innerHTML = `<strong>${player.name}</strong> <span style="color: #7f8c8d;">(${player.team})</span>`;
+        div.addEventListener('click', () => {
+          searchInput.value = player.name;
+          hideSuggestions();
+        });
+        suggestionsDiv.appendChild(div);
+      });
+      suggestionsDiv.style.display = 'block';
+    }
+
+    function hideSuggestions() {
+      suggestionsDiv.style.display = 'none';
+    }
+
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-container')) {
+        hideSuggestions();
+      }
+    });
+
+    function findPlayer(input) {
+      const query = input.trim();
+      
+      // Try to find by exact name match first
+      let player = players.find(p => p.name.toLowerCase() === query.toLowerCase());
+      
+      // If still not found, try partial name match
+      if (!player) {
+        player = players.find(p => p.name.toLowerCase().includes(query.toLowerCase()));
+      }
+      
+      return player;
+    }
+
+    function submitGuess() {
+      if (gameOver) return;
+
+      const input = document.getElementById('searchInput').value;
+      const guessedPlayer = findPlayer(input);
+
+      if (!guessedPlayer) {
+        alert('Player not found in database. Check the available players list in settings.');
+        return;
+      }
+
+      // Check if already guessed
+      if (guessHistory.some(g => g.name === guessedPlayer.name)) {
+        alert('You already guessed this player!');
+        return;
+      }
+
+      guessCount++;
+      guessHistory.push(guessedPlayer);
+
+      hideSuggestions();
+      displayGuess(guessedPlayer);
+      updateGameInfo();
+
+      if (guessedPlayer.name === target.name) {
+        endGame(true);
+      } else if (maxGuesses !== 999 && guessCount >= maxGuesses) {
+        endGame(false);
+      }
+
+      document.getElementById('searchInput').value = '';
+    }
+
+    function heightToString(inches) {
+  const feet = Math.floor(inches / 12);
+  const remainingInches = inches % 12;
+  return `${feet}'${remainingInches}"`; // Missing closing backtick and semicolon
+}
+
+    function displayGuess(guessedPlayer) {
+      const historyDiv = document.getElementById('guessHistory');
+      const guessDiv = document.createElement('div');
+      guessDiv.className = 'guess-item';
+
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'guess-header';
+      headerDiv.innerHTML = `
+        <span class="guess-name">${guessedPlayer.name}</span>
+        <span class="guess-team">${guessedPlayer.team}</span>
+      `;
+
+      const labelsDiv = document.createElement('div');
+      labelsDiv.className = 'feedback-labels';
+      labelsDiv.innerHTML = `
+        <div class="feedback-label">Team</div>
+        <div class="feedback-label">Height</div>
+        <div class="feedback-label">Age</div>
+        <div class="feedback-label">PPG</div>
+        <div class="feedback-label">Jersey</div>
+      `;
+
+      const feedbackDiv = document.createElement('div');
+      feedbackDiv.className = 'feedback-grid';
+
+      // Team feedback
+      const teamClass = guessedPlayer.team === target.team ? 'green' : 'gray';
+      feedbackDiv.innerHTML += `<div class="feedback-box ${teamClass}">${guessedPlayer.team}</div>`;
+
+      // Height feedback
+      const heightDiff = Math.abs(guessedPlayer.height - target.height);
+      let heightClass = 'gray';
+      let heightText = heightToString(guessedPlayer.height);
+      if (guessedPlayer.height === target.height) {
+        heightClass = 'green';
+      } else if (heightDiff <= 2) {
+        heightClass = 'yellow';
+      } else {
+        heightText += guessedPlayer.height > target.height ? ' ⬇️' : ' ⬆️';
+      }
+      feedbackDiv.innerHTML += `<div class="feedback-box ${heightClass}">${heightText}</div>`;
+
+      // Age feedback
+      const ageDiff = Math.abs(guessedPlayer.age - target.age);
+      let ageClass = 'gray';
+      let ageText = guessedPlayer.age.toString();
+      if (guessedPlayer.age === target.age) {
+        ageClass = 'green';
+      } else if (ageDiff <= 3) {
+        ageClass = 'yellow';
+      } else {
+        ageText += guessedPlayer.age > target.age ? ' ⬇️' : ' ⬆️';
+      }
+      feedbackDiv.innerHTML += `<div class="feedback-box ${ageClass}">${ageText}</div>`;
+
+      // PPG feedback
+      const ppgDiff = Math.abs(guessedPlayer.ppg - target.ppg);
+      let ppgClass = 'gray';
+      let ppgText = guessedPlayer.ppg.toString();
+      if (guessedPlayer.ppg === target.ppg) {
+        ppgClass = 'green';
+      } else if (ppgDiff <= 3) {
+        ppgClass = 'yellow';
+      } else {
+        ppgText += guessedPlayer.ppg > target.ppg ? ' ⬇️' : ' ⬆️';
+      }
+      feedbackDiv.innerHTML += `<div class="feedback-box ${ppgClass}">${ppgText}</div>`;
+
+      // Jersey feedback
+      const jerseyDiff = Math.abs(guessedPlayer.jersey - target.jersey);
+      let jerseyClass = 'gray';
+      let jerseyText = guessedPlayer.jersey.toString();
+      if (guessedPlayer.jersey === target.jersey) {
+        jerseyClass = 'green';
+      } else if (jerseyDiff <= 10) {
+        jerseyClass = 'yellow';
+      } else {
+        jerseyText += guessedPlayer.jersey > target.jersey ? ' ⬇️' : ' ⬆️';
+      }
+      feedbackDiv.innerHTML += `<div class="feedback-box ${jerseyClass}">${jerseyText}</div>`;
+
+      guessDiv.appendChild(headerDiv);
+      guessDiv.appendChild(labelsDiv);
+      guessDiv.appendChild(feedbackDiv);
+      
+      historyDiv.insertBefore(guessDiv, historyDiv.firstChild);
+    }
+
+    function endGame(won) {
+      gameOver = true;
+      document.getElementById('searchInput').disabled = true;
+      document.getElementById('guessButton').disabled = true;
+      
+      const resultDiv = document.getElementById('result');
+      if (won) {
+        resultDiv.innerHTML = `
+          <div class="result-message win-message">
+            🎉 Congratulations! You guessed ${target.name} correctly in ${guessCount} ${guessCount === 1 ? 'guess' : 'guesses'}!
+          </div>
+        `;
+      } else {
+        resultDiv.innerHTML = `
+          <div class="result-message lose-message">
+            😔 Game Over! The mystery player was ${target.name}.
+            <div class="target-reveal">
+              ${target.name} (${target.team}) - ${heightToString(target.height)}, ${target.age} years old, ${target.ppg} PPG, #${target.jersey}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function newGame() {
+      initGame();
+    }
+
+    // Initialize the game when page loads
+    window.addEventListener('load', initGame);
+  </script>
+</body>
+</html>

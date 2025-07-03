@@ -1,0 +1,1261 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTuber Guessing Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #ff4444 0%, #ffffff 50%, #000000 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .game-container {
+      background: white;
+      border-radius: 20px;
+      padding: 35px;
+      max-width: 900px;
+      width: 100%;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+      position: relative;
+    }
+
+    h1 {
+      color: #2c3e50;
+      font-size: 2.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #7f8c8d;
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+      line-height: 1.4;
+    }
+
+    .settings-button {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .settings-button:hover {
+      background: #e9ecef;
+      transform: rotate(90deg);
+    }
+
+    .settings-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+    }
+
+    .settings-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .settings-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #7f8c8d;
+      padding: 5px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-button:hover {
+      background: #f8f9fa;
+      color: #2c3e50;
+    }
+
+    .setting-group {
+      margin-bottom: 25px;
+    }
+
+    .setting-label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 16px;
+    }
+
+    .guess-options {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .guess-option {
+      padding: 10px 18px;
+      border: 2px solid #bdc3c7;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .guess-option:hover {
+      border-color: #ff4444;
+    }
+
+    .guess-option.active {
+      background: #ff4444;
+      color: white;
+      border-color: #ff4444;
+    }
+
+    .instructions {
+      padding: 20px;
+      background: #fff3cd;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #2c3e50;
+      line-height: 1.7;
+    }
+
+    .instructions strong {
+      color: #ff4444;
+    }
+
+    .youtubers-list {
+      margin-top: 20px;
+      max-height: 250px;
+      overflow-y: auto;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+    }
+
+    .youtubers-list ul {
+      columns: 2;
+      column-gap: 25px;
+      list-style-type: disc;
+      margin-left: 20px;
+    }
+
+    .youtubers-list li {
+      margin-bottom: 8px;
+      break-inside: avoid;
+      font-size: 13px;
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 25px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 15px 20px;
+      font-size: 16px;
+      border: 2px solid #bdc3c7;
+      border-radius: 12px;
+      background: white;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: #ff4444;
+      box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.1);
+    }
+
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #bdc3c7;
+      border-radius: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      margin-top: 5px;
+    }
+
+    .suggestion-item {
+      padding: 12px 18px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    .suggestion-item:hover {
+      background-color: #f8f9fa;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .controls {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .guess-button {
+      flex: 1;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      background: #ff4444;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .guess-button:hover:not(:disabled) {
+      background: #cc3333;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
+    }
+
+    .guess-button:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .new-game-button {
+      padding: 15px 30px;
+      font-size: 16px;
+      font-weight: 600;
+      border: 2px solid #4CAF50;
+      border-radius: 12px;
+      background: white;
+      color: #4CAF50;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .new-game-button:hover {
+      background: #4CAF50;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+    }
+
+    .game-info {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-item {
+      text-align: center;
+    }
+
+    .info-label {
+      font-size: 13px;
+      color: #7f8c8d;
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .guess-history {
+      margin-top: 30px;
+    }
+
+    .guess-item {
+      margin-bottom: 20px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-radius: 15px;
+      border: 1px solid #ecf0f1;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease;
+    }
+
+    .guess-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .guess-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .guess-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .guess-channel {
+      font-size: 13px;
+      color: #7f8c8d;
+      background: white;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid #dee2e6;
+    }
+
+    .feedback-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .feedback-box {
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 12px;
+      color: white;
+      transition: transform 0.2s ease;
+      min-height: 70px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .feedback-box:hover {
+      transform: scale(1.05);
+    }
+
+    .green { 
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+    }
+    
+    .yellow { 
+      background: linear-gradient(135deg, #ff9800, #f57c00);
+    }
+    
+    .gray { 
+      background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    }
+
+    .feedback-labels {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .feedback-label {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #7f8c8d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 4px;
+    }
+
+    .result-message {
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .win-message {
+      background: linear-gradient(135deg, #d5edda, #c3e6cb);
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+
+    .lose-message {
+      background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+
+    .target-reveal {
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .game-container {
+        padding: 25px;
+        margin: 10px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      .game-info {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .feedback-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .feedback-labels {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .settings-content {
+        padding: 25px;
+        width: 95%;
+      }
+
+      .youtubers-list ul {
+        columns: 1;
+      }
+
+      .guess-options {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .feedback-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .feedback-labels {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <button class="settings-button" onclick="openSettings()">⚙️</button>
+    
+    <h1>📺 YouTuber Guessing Game</h1>
+    <p class="subtitle">Guess the mystery YouTuber! Enter their channel name or real name.<br>Use the clues to narrow down your guesses!</p>
+
+    <div class="game-info">
+      <div class="info-item">
+        <div class="info-label">Guesses Left</div>
+        <div class="info-value" id="guessesLeft">5</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Total Guesses</div>
+        <div class="info-value" id="totalGuesses">0</div>
+      </div>
+    </div>
+
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="searchInput" 
+        class="search-input" 
+        placeholder="Search by channel name or real name (e.g., MrBeast or Jimmy Donaldson)" 
+        autocomplete="off"
+      />
+      <div class="suggestions" id="suggestions"></div>
+    </div>
+
+    <div class="controls">
+      <button class="guess-button" id="guessButton" onclick="submitGuess()">Make Guess</button>
+      <button class="new-game-button" onclick="newGame()">New Game</button>
+    </div>
+
+    <div class="guess-history" id="guessHistory"></div>
+    <div id="result"></div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="settings-modal" id="settingsModal">
+    <div class="settings-content">
+      <div class="settings-header">
+        <h3 class="settings-title">Game Settings</h3>
+        <button class="close-button" onclick="closeSettings()">×</button>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">Number of Guesses:</label>
+        <div class="guess-options">
+          <div class="guess-option" onclick="setMaxGuesses(3)">3 (Hard)</div>
+          <div class="guess-option active" onclick="setMaxGuesses(5)">5 (Normal)</div>
+          <div class="guess-option" onclick="setMaxGuesses(10)">10 (Easy)</div>
+          <div class="guess-option" onclick="setMaxGuesses(999)">Unlimited</div>
+        </div>
+      </div>
+
+      <div class="instructions">
+        <strong>🟢 Green:</strong> Exact match<br>
+        <strong>🟡 Yellow:</strong> Close (within range)<br>
+        <strong>⬆️ Higher:</strong> Your guess is lower than the target<br>
+        <strong>⬇️ Lower:</strong> Your guess is higher than the target
+        <br><br>
+        Try to guess the mystery YouTuber by analyzing the feedback from each guess!
+        <br><br>
+        <strong>YouTubers in the game:</strong>
+        <div class="youtubers-list">
+          <ul>
+            <li>MrBeast (Jimmy Donaldson)</li>
+            <li>PewDiePie (Felix Kjellberg)</li>
+            <li>Dude Perfect</li>
+            <li>Markiplier (Mark Fischbach)</li>
+            <li>Jacksepticeye (Sean McLoughlin)</li>
+            <li>Logan Paul</li>
+            <li>Jake Paul</li>
+            <li>KSI (JJ Olatunji)</li>
+            <li>David Dobrik</li>
+            <li>James Charles</li>
+            <li>Emma Chamberlain</li>
+            <li>Ninja (Tyler Blevins)</li>
+            <li>Pokimane (Imane Anys)</li>
+            <li>Dream</li>
+            <li>TommyInnit (Tommy Simons)</li>
+            <li>Wilbur Soot (Will Gold)</li>
+            <li>GeorgeNotFound (George Davidson)</li>
+            <li>Karl Jacobs</li>
+            <li>Sapnap (Nick Armstrong)</li>
+            <li>CoryxKenshin (Cory DeVante Williams)</li>
+            <li>Corpse Husband</li>
+            <li>Valkyrae (Rachel Hofstetter)</li>
+            <li>Ryan's World (Ryan Kaji)</li>
+            <li>Like Nastya (Anastasia Radzinskaya)</li>
+            <li>Vlad and Niki</li>
+            <li>T-Series</li>
+            <li>SET India</li>
+            <li>Cocomelon</li>
+            <li>5-Minute Crafts</li>
+            <li>WWE</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const youtubers = [
+      {
+        channelName: "MrBeast",
+        realName: "Jimmy Donaldson",
+        subscribers: 330, // millions (updated 2024)
+        yearStarted: 2012,
+        totalViews: 55.8, // billions
+        contentType: "Entertainment/Stunts",
+        age: 26
+      },
+      {
+        channelName: "PewDiePie",
+        realName: "Felix Kjellberg",
+        subscribers: 111,
+        yearStarted: 2010,
+        totalViews: 29.7,
+        contentType: "Gaming/Commentary",
+        age: 35
+      },
+      {
+        channelName: "Dude Perfect",
+        realName: "Dude Perfect Team",
+        subscribers: 60,
+        yearStarted: 2009,
+        totalViews: 16.2,
+        contentType: "Sports/Tricks",
+        age: 36
+      },
+      {
+        channelName: "Markiplier",
+        realName: "Mark Fischbach",
+        subscribers: 37,
+        yearStarted: 2012,
+        totalViews: 21.1,
+        contentType: "Gaming/Horror",
+        age: 35
+      },
+      {
+        channelName: "Jacksepticeye",
+        realName: "Sean McLoughlin",
+        subscribers: 30,
+        yearStarted: 2012,
+        totalViews: 16.8,
+        contentType: "Gaming/Comedy",
+        age: 34
+      },
+      {
+        channelName: "Logan Paul",
+        realName: "Logan Paul",
+        subscribers: 23,
+        yearStarted: 2013,
+        totalViews: 6.4,
+        contentType: "Entertainment/Vlog",
+        age: 29
+      },
+      {
+        channelName: "Jake Paul",
+        realName: "Jake Paul",
+        subscribers: 20,
+        yearStarted: 2013,
+        totalViews: 7.5,
+        contentType: "Entertainment/Music",
+        age: 27
+      },
+      {
+        channelName: "KSI",
+        realName: "JJ Olatunji",
+        subscribers: 24,
+        yearStarted: 2009,
+        totalViews: 7.2,
+        contentType: "Gaming/Music",
+        age: 31
+      },
+      {
+        channelName: "David Dobrik",
+        realName: "David Dobrik",
+        subscribers: 18,
+        yearStarted: 2015,
+        totalViews: 9.8,
+        contentType: "Vlog/Comedy",
+        age: 28
+      },
+      {
+        channelName: "James Charles",
+        realName: "James Charles Dickinson",
+        subscribers: 24,
+        yearStarted: 2015,
+        totalViews: 4.6,
+        contentType: "Beauty/Makeup",
+        age: 25
+      },
+      {
+        channelName: "Emma Chamberlain",
+        realName: "Emma Chamberlain",
+        subscribers: 12,
+        yearStarted: 2017,
+        totalViews: 2.3,
+        contentType: "Lifestyle/Vlog",
+        age: 23
+      },
+      {
+        channelName: "Ninja",
+        realName: "Tyler Blevins",
+        subscribers: 24,
+        yearStarted: 2011,
+        totalViews: 2.8,
+        contentType: "Gaming/Fortnite",
+        age: 33
+      },
+      {
+        channelName: "Pokimane",
+        realName: "Imane Anys",
+        subscribers: 7,
+        yearStarted: 2013,
+        totalViews: 0.9,
+        contentType: "Gaming/Streaming",
+        age: 28
+      },
+      {
+        channelName: "Dream",
+        realName: "Clay",
+        subscribers: 32,
+        yearStarted: 2014,
+        totalViews: 3.2,
+        contentType: "Gaming/Minecraft",
+        age: 25
+      },
+      {
+        channelName: "TommyInnit",
+        realName: "Tommy Simons",
+        subscribers: 12,
+        yearStarted: 2018,
+        totalViews: 2.4,
+        contentType: "Gaming/Minecraft",
+        age: 20
+      },
+      {
+        channelName: "Wilbur Soot",
+        realName: "Will Gold",
+        subscribers: 6,
+        yearStarted: 2017,
+        totalViews: 1.1,
+        contentType: "Gaming/Music",
+        age: 28
+      },
+      {
+        channelName: "GeorgeNotFound",
+        realName: "George Davidson",
+        subscribers: 11,
+        yearStarted: 2013,
+        totalViews: 1.3,
+        contentType: "Gaming/Minecraft",
+        age: 28
+      },
+      {
+        channelName: "Karl Jacobs",
+        realName: "Karl Jacobs",
+        subscribers: 4,
+        yearStarted: 2017,
+        totalViews: 0.6,
+        contentType: "Gaming/Comedy",
+        age: 26
+      },
+      {
+        channelName: "Sapnap",
+        realName: "Nick Armstrong",
+        subscribers: 5,
+        yearStarted: 2019,
+        totalViews: 0.8,
+        contentType: "Gaming/Minecraft",
+        age: 23
+      },
+      {
+        channelName: "CoryxKenshin",
+        realName: "Cory DeVante Williams",
+        subscribers: 18,
+        yearStarted: 2009,
+        totalViews: 8.2,
+        contentType: "Gaming/Horror",
+        age: 32
+      },
+      {
+        channelName: "Corpse Husband",
+        realName: "Corpse Husband",
+        subscribers: 8,
+        yearStarted: 2015,
+        totalViews: 0.6,
+        contentType: "Horror/Gaming",
+        age: 27
+      },
+      {
+        channelName: "Valkyrae",
+        realName: "Rachel Hofstetter",
+        subscribers: 4,
+        yearStarted: 2014,
+        totalViews: 0.4,
+        contentType: "Gaming/Streaming",
+        age: 33
+      },
+      {
+        channelName: "Ryan's World",
+        realName: "Ryan Kaji",
+        subscribers: 37,
+        yearStarted: 2015,
+        totalViews: 19.8,
+        contentType: "Kids/Toys",
+        age: 13
+      },
+      {
+        channelName: "Like Nastya",
+        realName: "Anastasia Radzinskaya",
+        subscribers: 116,
+        yearStarted: 2016,
+        totalViews: 98.5,
+        contentType: "Kids/Entertainment",
+        age: 11
+      },
+      {
+        channelName: "Vlad and Niki",
+        realName: "Vladislav and Nikita Vashketov",
+        subscribers: 98,
+        yearStarted: 2018,
+        totalViews: 78.3,
+        contentType: "Kids/Entertainment",
+        age: 11
+      },
+      {
+        channelName: "T-Series",
+        realName: "T-Series Music Label",
+        subscribers: 275,
+        yearStarted: 2006,
+        totalViews: 253.2,
+        contentType: "Music/Bollywood",
+        age: 42
+      },
+      {
+        channelName: "SET India",
+        realName: "Sony Entertainment Television",
+        subscribers: 183,
+        yearStarted: 2006,
+        totalViews: 158.7,
+        contentType: "Entertainment/TV",
+        age: 35
+      },
+      {
+        channelName: "Cocomelon",
+        realName: "Treasure Studio Inc",
+        subscribers: 178,
+        yearStarted: 2006,
+        totalViews: 189.4,
+        contentType: "Kids/Nursery Rhymes",
+        age: 18
+      },
+      {
+        channelName: "5-Minute Crafts",
+        realName: "TheSoul Publishing",
+        subscribers: 79,
+        yearStarted: 2016,
+        totalViews: 26.8,
+        contentType: "DIY/Crafts",
+        age: 8
+      },
+      {
+        channelName: "WWE",
+        realName: "World Wrestling Entertainment",
+        subscribers: 96,
+        yearStarted: 2007,
+        totalViews: 74.2,
+        contentType: "Sports/Wrestling",
+        age: 17
+      }
+    ];
+
+    let target = null;
+    let guessCount = 0;
+    let maxGuesses = 5;
+    let gameOver = false;
+    let guessHistory = [];
+
+    function initGame() {
+      target = youtubers[Math.floor(Math.random() * youtubers.length)];
+      guessCount = 0;
+      gameOver = false;
+      guessHistory = [];
+      updateGameInfo();
+      document.getElementById('guessHistory').innerHTML = '';
+      document.getElementById('result').innerHTML = '';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchInput').disabled = false;
+      document.getElementById('guessButton').disabled = false;
+      hideSuggestions();
+    }
+
+    function updateGameInfo() {
+      if (maxGuesses === 999) {
+        document.getElementById('guessesLeft').textContent = '∞';
+      } else {
+        document.getElementById('guessesLeft').textContent = maxGuesses - guessCount;
+      }
+      document.getElementById('totalGuesses').textContent = guessCount;
+    }
+
+    function openSettings() {
+      document.getElementById('settingsModal').style.display = 'block';
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    function setMaxGuesses(newMax) {
+      maxGuesses = newMax;
+      
+      // Update active button
+      document.querySelectorAll('.guess-option').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // Update display
+      updateGameInfo();
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('settingsModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeSettings();
+      }
+    });
+
+    // Search functionality with real-time suggestions
+    const searchInput = document.getElementById('searchInput');
+    const suggestionsDiv = document.getElementById('suggestions');
+
+    searchInput.addEventListener('input', function() {
+      const query = this.value.toLowerCase().trim();
+      
+      if (query.length === 0) {
+        hideSuggestions();
+        return;
+      }
+// Continuing from where the code left off...
+
+const matches = youtubers.filter(youtuber => 
+  youtuber.channelName.toLowerCase().includes(query) || 
+  youtuber.realName.toLowerCase().includes(query)
+);
+
+if (matches.length > 0 && matches.length <= 10) {
+  showSuggestions(matches);
+} else {
+  hideSuggestions();
+}
+});
+
+function showSuggestions(matches) {
+  suggestionsDiv.innerHTML = '';
+  matches.forEach(youtuber => {
+    const suggestionItem = document.createElement('div');
+    suggestionItem.className = 'suggestion-item';
+    suggestionItem.textContent = `${youtuber.channelName} (${youtuber.realName})`;
+    suggestionItem.addEventListener('click', function() {
+      searchInput.value = youtuber.channelName;
+      hideSuggestions();
+    });
+    suggestionsDiv.appendChild(suggestionItem);
+  });
+  suggestionsDiv.style.display = 'block';
+}
+
+function hideSuggestions() {
+  suggestionsDiv.style.display = 'none';
+}
+
+// Hide suggestions when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.search-container')) {
+    hideSuggestions();
+  }
+});
+
+// Enter key support
+searchInput.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    submitGuess();
+  }
+});
+
+function submitGuess() {
+  if (gameOver) return;
+  
+  const input = document.getElementById('searchInput').value.trim();
+  if (!input) {
+    alert('Please enter a guess!');
+    return;
+  }
+
+  // Find the guessed YouTuber
+  const guess = youtubers.find(youtuber => 
+    youtuber.channelName.toLowerCase() === input.toLowerCase() || 
+    youtuber.realName.toLowerCase() === input.toLowerCase()
+  );
+
+  if (!guess) {
+    alert('YouTuber not found! Please select from the suggestions or check the list in settings.');
+    return;
+  }
+
+  // Check if already guessed
+  if (guessHistory.some(g => g.channelName === guess.channelName)) {
+    alert('You already guessed this YouTuber!');
+    return;
+  }
+
+  guessCount++;
+  guessHistory.push(guess);
+  
+  // Clear input and hide suggestions
+  document.getElementById('searchInput').value = '';
+  hideSuggestions();
+
+  // Create feedback
+  const feedback = createFeedback(guess, target);
+  displayGuess(guess, feedback);
+
+  // Check win condition
+  if (guess.channelName === target.channelName) {
+    endGame(true);
+  } else if (guessCount >= maxGuesses && maxGuesses !== 999) {
+    endGame(false);
+  }
+
+  updateGameInfo();
+}
+
+function createFeedback(guess, target) {
+  const feedback = {};
+
+  // Subscribers (in millions)
+  if (guess.subscribers === target.subscribers) {
+    feedback.subscribers = { status: 'correct', value: guess.subscribers + 'M' };
+  } else if (Math.abs(guess.subscribers - target.subscribers) <= 5) {
+    feedback.subscribers = { 
+      status: 'close', 
+      value: guess.subscribers + 'M',
+      direction: guess.subscribers < target.subscribers ? 'higher' : 'lower'
+    };
+  } else {
+    feedback.subscribers = { 
+      status: 'wrong', 
+      value: guess.subscribers + 'M',
+      direction: guess.subscribers < target.subscribers ? 'higher' : 'lower'
+    };
+  }
+
+  // Year Started
+  if (guess.yearStarted === target.yearStarted) {
+    feedback.yearStarted = { status: 'correct', value: guess.yearStarted };
+  } else if (Math.abs(guess.yearStarted - target.yearStarted) <= 2) {
+    feedback.yearStarted = { 
+      status: 'close', 
+      value: guess.yearStarted,
+      direction: guess.yearStarted < target.yearStarted ? 'higher' : 'lower'
+    };
+  } else {
+    feedback.yearStarted = { 
+      status: 'wrong', 
+      value: guess.yearStarted,
+      direction: guess.yearStarted < target.yearStarted ? 'higher' : 'lower'
+    };
+  }
+
+  // Total Views (in billions)
+  if (Math.abs(guess.totalViews - target.totalViews) < 0.1) {
+    feedback.totalViews = { status: 'correct', value: guess.totalViews + 'B' };
+  } else if (Math.abs(guess.totalViews - target.totalViews) <= 2) {
+    feedback.totalViews = { 
+      status: 'close', 
+      value: guess.totalViews + 'B',
+      direction: guess.totalViews < target.totalViews ? 'higher' : 'lower'
+    };
+  } else {
+    feedback.totalViews = { 
+      status: 'wrong', 
+      value: guess.totalViews + 'B',
+      direction: guess.totalViews < target.totalViews ? 'higher' : 'lower'
+    };
+  }
+
+  // Content Type
+  if (guess.contentType === target.contentType) {
+    feedback.contentType = { status: 'correct', value: guess.contentType };
+  } else {
+    feedback.contentType = { status: 'wrong', value: guess.contentType };
+  }
+
+  // Age
+  if (guess.age === target.age) {
+    feedback.age = { status: 'correct', value: guess.age };
+  } else if (Math.abs(guess.age - target.age) <= 3) {
+    feedback.age = { 
+      status: 'close', 
+      value: guess.age,
+      direction: guess.age < target.age ? 'higher' : 'lower'
+    };
+  } else {
+    feedback.age = { 
+      status: 'wrong', 
+      value: guess.age,
+      direction: guess.age < target.age ? 'higher' : 'lower'
+    };
+  }
+
+  return feedback;
+}
+
+function displayGuess(guess, feedback) {
+  const historyDiv = document.getElementById('guessHistory');
+  
+  const guessItem = document.createElement('div');
+  guessItem.className = 'guess-item';
+
+  const header = document.createElement('div');
+  header.className = 'guess-header';
+  
+  const name = document.createElement('div');
+  name.className = 'guess-name';
+  name.textContent = guess.channelName;
+  
+  const channel = document.createElement('div');
+  channel.className = 'guess-channel';
+  channel.textContent = guess.realName;
+  
+  header.appendChild(name);
+  header.appendChild(channel);
+
+  // Create feedback labels (only once)
+  if (guessCount === 1) {
+    const labelsDiv = document.createElement('div');
+    labelsDiv.className = 'feedback-labels';
+    
+    const labels = ['Subscribers', 'Year Started', 'Total Views', 'Content Type', 'Age'];
+    labels.forEach(label => {
+      const labelDiv = document.createElement('div');
+      labelDiv.className = 'feedback-label';
+      labelDiv.textContent = label;
+      labelsDiv.appendChild(labelDiv);
+    });
+    
+    guessItem.appendChild(header);
+    guessItem.appendChild(labelsDiv);
+  } else {
+    guessItem.appendChild(header);
+  }
+
+  // Create feedback grid
+  const feedbackGrid = document.createElement('div');
+  feedbackGrid.className = 'feedback-grid';
+
+  const categories = ['subscribers', 'yearStarted', 'totalViews', 'contentType', 'age'];
+  categories.forEach(category => {
+    const box = document.createElement('div');
+    box.className = 'feedback-box';
+    
+    const fb = feedback[category];
+    let className = '';
+    let content = fb.value;
+    
+    if (fb.status === 'correct') {
+      className = 'green';
+    } else if (fb.status === 'close') {
+      className = 'yellow';
+      if (fb.direction) {
+        content += fb.direction === 'higher' ? ' ⬆️' : ' ⬇️';
+      }
+    } else {
+      className = 'gray';
+      if (fb.direction) {
+        content += fb.direction === 'higher' ? ' ⬆️' : ' ⬇️';
+      }
+    }
+    
+    box.className += ' ' + className;
+    box.textContent = content;
+    feedbackGrid.appendChild(box);
+  });
+
+  guessItem.appendChild(feedbackGrid);
+  historyDiv.appendChild(guessItem);
+}
+
+function endGame(won) {
+  gameOver = true;
+  document.getElementById('searchInput').disabled = true;
+  document.getElementById('guessButton').disabled = true;
+
+  const resultDiv = document.getElementById('result');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'result-message';
+
+  if (won) {
+    messageDiv.className += ' win-message';
+    messageDiv.innerHTML = `
+      🎉 Congratulations! You guessed it! 🎉
+      <div class="target-reveal">
+        The mystery YouTuber was <strong>${target.channelName}</strong> (${target.realName})!<br>
+        You got it in ${guessCount} guess${guessCount === 1 ? '' : 'es'}!
+      </div>
+    `;
+  } else {
+    messageDiv.className += ' lose-message';
+    messageDiv.innerHTML = `
+      😢 Game Over! You've used all your guesses. 😢
+      <div class="target-reveal">
+        The mystery YouTuber was <strong>${target.channelName}</strong> (${target.realName})!<br>
+        <strong>Stats:</strong> ${target.subscribers}M subscribers, started in ${target.yearStarted}, ${target.totalViews}B total views, ${target.contentType}, age ${target.age}
+      </div>
+    `;
+  }
+
+  resultDiv.appendChild(messageDiv);
+}
+
+function newGame() {
+  if (confirm('Are you sure you want to start a new game?')) {
+    initGame();
+  }
+}
+
+// Initialize the game when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  initGame();
+});
+</script>
+</body>
+</html>

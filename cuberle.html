@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WCA ID Guessing Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #4a90e2 0%, #2ecc71 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .game-container {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    h1 {
+      color: #2c3e50;
+      font-size: 2.2rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #7f8c8d;
+      margin-bottom: 25px;
+      font-size: 1rem;
+    }
+
+    .settings-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+
+    .settings-button:hover {
+      background: #e9ecef;
+      transform: rotate(90deg);
+    }
+
+    .settings-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+    }
+
+    .settings-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .settings-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #7f8c8d;
+      padding: 5px;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-button:hover {
+      background: #f8f9fa;
+      color: #2c3e50;
+    }
+    .setting-group {
+  margin-bottom: 20px;
+}
+
+.setting-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.guess-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.guess-option {
+  padding: 8px 16px;
+  border: 2px solid #bdc3c7;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.guess-option:hover {
+  border-color: #4a90e2;
+}
+
+.guess-option.active {
+  background: #4a90e2;
+  color: white;
+  border-color: #4a90e2;
+}
+
+    .instructions {
+      padding: 15px;
+      background: #e8f4f8;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #2c3e50;
+      line-height: 1.6;
+    }
+
+    .instructions strong {
+      color: #2ecc71;
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 2px solid #bdc3c7;
+      border-radius: 8px;
+      background: white;
+      transition: border-color 0.3s ease;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: #4a90e2;
+    }
+
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #bdc3c7;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .suggestion-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    .suggestion-item:hover {
+      background-color: #f8f9fa;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .guess-button {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      background: #4a90e2;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .guess-button:hover:not(:disabled) {
+      background: #357abd;
+    }
+
+    .guess-button:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    .new-game-button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border: 2px solid #2ecc71;
+      border-radius: 8px;
+      background: white;
+      color: #2ecc71;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .new-game-button:hover {
+      background: #2ecc71;
+      color: white;
+    }
+    button, input {
+  min-height: 44px;
+}
+
+    .game-info {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 25px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .info-item {
+      text-align: center;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #7f8c8d;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .info-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .guess-history {
+      margin-top: 25px;
+    }
+
+    .guess-item {
+      margin-bottom: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #ecf0f1;
+    }
+
+    .guess-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .guess-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .guess-id {
+      font-size: 12px;
+      color: #7f8c8d;
+      background: white;
+      padding: 3px 6px;
+      border-radius: 4px;
+    }
+
+    .feedback-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+    }
+
+    .feedback-box {
+      padding: 8px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 13px;
+      color: white;
+    }
+
+    .green { 
+      background: #2ecc71;
+    }
+    
+    .yellow { 
+      background: #f39c12;
+    }
+    
+    .gray { 
+      background: #95a5a6;
+    }
+
+    .feedback-labels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .feedback-label {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #7f8c8d;
+    }
+
+    .result-message {
+      margin-top: 25px;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .win-message {
+      background: #d5edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .cuber-list {
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+/* Scrollbar style for WebKit (Chrome/Safari) */
+.cuber-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cuber-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
+
+.cuber-list::-webkit-scrollbar-thumb {
+  background: #4a90e2;
+  border-radius: 8px;
+  border: 2px solid #f1f1f1;
+}
+
+/* For Firefox */
+.cuber-list {
+  scrollbar-width: thin;
+  scrollbar-color: #4a90e2 #f1f1f1;
+}
+.cuber-list ul {
+  columns: 2;
+  column-gap: 20px;
+  list-style-type: disc;
+  padding-left: 20px;
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+    .lose-message {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .target-reveal {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .game-container {
+        padding: 20px;
+        margin: 10px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      .game-info {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .feedback-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .feedback-labels {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .settings-content {
+        padding: 20px;
+        width: 95%;
+      }
+      @media (max-width: 600px) {
+  .cuber-list ul {
+    columns: 1;
+  }
+}
+@media (max-width: 500px) {
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .guess-button,
+  .new-game-button {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .settings-title {
+    font-size: 18px;
+  }
+
+  .info-value {
+    font-size: 18px;
+  }
+}
+.settings-content {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <button class="settings-button" onclick="openSettings()">⚙️</button>
+    
+    <h1>🧩 Rubiks Cuber Guessing Game</h1>
+    <p class="subtitle">Guess the mystery speedcuber! Enter a name or WCA ID</p>
+
+    <div class="game-info">
+      <div class="info-item">
+        <div class="info-label">Guesses Left</div>
+        <div class="info-value" id="guessesLeft">5</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Total Guesses</div>
+        <div class="info-value" id="totalGuesses">0</div>
+      </div>
+    </div>
+
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="searchInput" 
+        class="search-input" 
+        placeholder="Search by name or enter WCA ID (e.g., Max Park or 2012PARK03)" 
+        autocomplete="off"
+      />
+      <div class="suggestions" id="suggestions"></div>
+    </div>
+
+    <div class="controls">
+      <button class="guess-button" id="guessButton" onclick="submitGuess()">Make Guess</button>
+      <button class="new-game-button" onclick="newGame()">New Game</button>
+    </div>
+
+    <div class="guess-history" id="guessHistory"></div>
+    <div id="result"></div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="settings-modal" id="settingsModal">
+    <div class="settings-content">
+      <div class="settings-header">
+  <h3 class="settings-title">Game Settings</h3>
+  <button class="close-button" onclick="closeSettings()">×</button>
+</div>
+
+<div class="setting-group">
+  <label class="setting-label">Number of Guesses:</label>
+  <div class="guess-options">
+    <div class="guess-option" onclick="setMaxGuesses(3)">3 (Hard)</div>
+    <div class="guess-option active" onclick="setMaxGuesses(5)">5 (Normal)</div>
+    <div class="guess-option" onclick="setMaxGuesses(10)">10 (Easy)</div>
+    <div class="guess-option" onclick="setMaxGuesses(999)">Unlimited</div>
+  </div>
+</div>
+
+<div class="instructions">
+  <strong>🟢 Green:</strong> Exact match<br>
+  <strong>🟡 Yellow:</strong> Close (same continent/within 5)<br>
+  <strong>⬆️ Higher:</strong> Your guess is lower than the target (Slower, After, More)<br>
+  <strong>⬇️ Lower:</strong> Your guess is higher than the target (Faster, Before, Less)
+  <br><br>
+  Try to guess the mystery speedcuber by analyzing the feedback from each guess (Inspired by Samuel Fang)! (Last updated at 2/07/2025) <br>
+  People who are in the game (more coming soon):
+  <div class="cuber-list">
+  <ul>
+      <li>Yusheng Du</li>
+      <li>Xuanyi Geng</li>
+      <li>Max Park</li>
+      <li>Feliks Zemdegs</li>
+      <li>Ruihang Xu</li>
+      <li>Tymon Kilasinski</li>
+      <li>Matty Hiroto Inaba</li>
+      <li>Yiheng Wang</li>
+      <li>Aidan Grainger</li>
+      <li>Claudio Matias Cancino Bruna</li>
+      <li>Mats Valk</li>
+      <li>Liam Sawade</li>
+      <li>Lucas Etter</li>
+      <li>Leo Borromeo</li>
+      <li>Drew Brads</li>
+      <li>Sebastian Lee</li>
+      <li>Luke Garrett</li>
+      <li>Kyle Santucci</li>
+      <li>Angel Armando Jaime Sánchez</li>
+      <li>Daniel Rush</li>
+      <li>Timofei Tarasenko</li>
+      <li>Bill Wang</li>
+      <li>Ryan Pilat</li>
+      <li>Jode Brewster</li>
+      <li>Dwayne Ramos</li>
+      <li>Toby Seufert</li>
+      <li>Jasper Murray</li>
+      <li>Chris Mills</li>
+      <li>Qixian Cao</li>
+      <li>Ming Dao Ting</li>
+      <li>Sebastian Weyer</li>
+      <li>Teodor Zajder</li>
+      <li>Twan Dullemond</li>
+      <li>Caio Hideaki Sato</li>
+      <li>Seung Hyuk Nahm</li>
+      <li>Milan Struyf</li>
+      <li>Charlie Eggins</li>
+      <li>Emmanuel Hawkins</li>
+      <li>Tommy Cherry</li>
+  </ul>
+  </div>
+</div>
+    </div>
+  </div>
+
+  <script>
+    const cubers = [
+      {
+        id: "2015DUYU01",
+        name: "Yusheng Du",
+        country: "China",
+        continent: "Asia",
+        bestRank: 8,
+        yearStarted: 2015,
+        prSingle: 3.47,
+        worldRecords: 1
+      },
+      {
+        id: "2023GENG02",
+        name: "Xuanyi Geng",
+        country: "China",
+        continent: "Asia",
+        bestRank: 1,
+        yearStarted: 2023,
+        prSingle: 3.05,
+        worldRecords: 1
+      },
+      {
+        id: "2012PARK03",
+        name: "Max Park",
+        country: "USA",
+        continent: "North America",
+        bestRank: 1,
+        yearStarted: 2012,
+        prSingle: 3.13,
+        worldRecords: 86
+      },
+      {
+        id: "2009ZEMD01",
+        name: "Feliks Zemdegs",
+        country: "Australia",
+        continent: "Oceania",
+        bestRank: 7,
+        yearStarted: 2009,
+        prSingle: 4.16,
+        worldRecords: 121
+      },
+      {
+        id: "2017XURU04",
+        name: "Ruihang Xu",
+        country: "China",
+        continent: "Asia",
+        bestRank: 4,
+        yearStarted: 2017,
+        prSingle: 3.24,
+        worldRecords: 1
+      },
+      {
+        id: "2016KOLA02",
+        name: "Tymon Kolasiński",
+        country: "Poland",
+        continent: "Europe",
+        bestRank: 1,
+        yearStarted: 2016,
+        prSingle: 3.66,
+        worldRecords: 10
+      },
+      {
+        id: "2016INAB01",
+        name: "Matty Hiroto Inaba",
+        country: "USA",
+        continent: "North America",
+        bestRank: 4,
+        yearStarted: 2016,
+        prSingle: 3.59,
+        worldRecords: 0
+      },
+      {
+        id: "2019WANY36",
+        name: "Yiheng Wang",
+        country: "China",
+        continent: "Asia",
+        bestRank: 1,
+        yearStarted: 2019,
+        prSingle: 3.06,
+        worldRecords: 13
+      },
+      {
+        id: "2018GRAI01",
+        name: "Aidan Grainger",
+        country: "UK",
+        continent: "Europe",
+        bestRank: 1,
+        yearStarted: 2018,
+        prSingle: 3.69,
+        worldRecords: 1
+      },
+      {
+        id: "2019BRUN02",
+        name: "Claudio Matias Cancino Bruna",
+        country: "Chile",
+        continent: "South America",
+        bestRank: 15,
+        yearStarted: 2019,
+        prSingle: 3.74,
+        worldRecords: 0
+      },
+      {
+        id: "2007VALK01",
+        name: "Mats Valk",
+        country: "Netherlands",
+        continent: "Europe",
+        bestRank: 25,
+        yearStarted: 2007,
+        prSingle: 4.74,
+        worldRecords: 5
+      },
+      {
+        id: "2011ETTE01",
+        name: "Lucas Etter",
+        country: "USA",
+        continent: "North America",
+        bestRank: 87,
+        yearStarted: 2011,
+        prSingle: 4.90,
+        worldRecords: 4
+      },
+      {
+        id: "2022SAWA01",
+        name: "Liam Sawade",
+        country: "Australia",
+        continent: "Oceania",
+        bestRank: 332,
+        yearStarted: 2022,
+        prSingle: 7.56,
+        worldRecords: 0
+      },
+      {
+        id: "2015BORR01",
+        name: "Leo Borromeo",
+        country: "Philippines",
+        continent: "Asia",
+        bestRank: 13,
+        yearStarted: 2015,
+        prSingle: 4.14,
+        worldRecords: 0
+      },
+      {
+        id: "2010BRAD01",
+        name: "Drew Brads",
+        country: "USA",
+        continent: "North America",
+        bestRank: 119,
+        yearStarted: 2010,
+        prSingle: 4.35,
+        worldRecords: 1
+      },
+      {
+        id: "2021LEES01",
+        name: "Sebastian Lee",
+        country: "Australia",
+        continent: "Oceania",
+        bestRank: 1,
+        yearStarted: 2021,
+        prSingle: 6.00,
+        worldRecords: 1
+      },
+      {
+        id: "2016SANT08",
+        name: "Kyle Santucci",
+        country: "Canada",
+        continent: "North America",
+        bestRank: 16,
+        yearStarted: 2016,
+        prSingle: 4.26,
+        worldRecords: 0
+      },
+      {
+        id: "2018SANC03",
+        name: "Angel Armando Jaime Sánchez",
+        country: "Mexico",
+        continent: "North America",
+        bestRank: 21,
+        yearStarted: 2018,
+        prSingle: 4.46,
+        worldRecords: 0
+      },
+      {
+        id: "2018RUSH01",
+        name: "Daniel Rush",
+        country: "South Africa",
+        continent: "Africa",
+        bestRank: 38,
+        yearStarted: 2018,
+        prSingle: 4.86,
+        worldRecords: 0
+      },
+      {
+        id: "2019TARA09",
+        name: "Timofei Tarasenko",
+        country: "Russia",
+        continent: "Asia",
+        bestRank: 1,
+        yearStarted: 2019,
+        prSingle: 3.72,
+        worldRecords: 1
+      },
+      {
+        id: "2010WANG68",
+        name: "Bill Wang",
+        country: "Canada",
+        continent: "North America",
+        bestRank: 21,
+        yearStarted: 2010,
+        prSingle: 4.62,
+        worldRecords: 0
+      },
+      {
+        id: "2016PILA03",
+        name: "Ryan Pilat",
+        country: "USA",
+        continent: "North America",
+        bestRank: 1,
+        yearStarted: 2016,
+        prSingle: 3.34,
+        worldRecords: 2
+      },
+      {
+        id: "2016JONE04",
+        name: "Jode Brewster",
+        country: "Australia",
+        continent: "Oceania",
+        bestRank: 17,
+        yearStarted: 2016,
+        prSingle: 3.88,
+        worldRecords: 0
+      },
+      {
+        id: "2019RAMO05",
+        name: "Dwyane Ramos",
+        country: "New Zealand",
+        continent: "Oceania",
+        bestRank: 10,
+        yearStarted: 2019,
+        prSingle: 4.54,
+        worldRecords: 0
+      },
+      {
+        id: "2018MURR03",
+        name: "Jasper Murray",
+        country: "New Zealand",
+        continent: "Oceania",
+        bestRank: 3,
+        yearStarted: 2018,
+        prSingle: 4.58,
+        worldRecords: 2
+      },
+      {
+        id: "2021SEUF01",
+        name: "Toby Seufert",
+        country: "Australia",
+        continent: "Oceania",
+        bestRank: 59,
+        yearStarted: 2021,
+        prSingle: 4.29,
+        worldRecords: 0
+      },
+      {
+        id: "2016SATO01",
+        name: "Caio Hideaki Sato",
+        country: "Brazil",
+        continent: "South America",
+        bestRank: 23,
+        yearStarted: 2016,
+        prSingle: 4.37,
+        worldRecords: 0
+      },
+      {
+        id: "2013NAHM01",
+        name: "Seung Hyuk Nahm",
+        country: "South Korea",
+        continent: "Asia",
+        bestRank: 2,
+        yearStarted: 2013,
+        prSingle: 4.17,
+        worldRecords: 1
+      },
+      {
+        id: "2023CAOQ01",
+        name: "Qixian Cao",
+        country: "China",
+        continent: "Asia",
+        bestRank: 19,
+        yearStarted: 2023,
+        prSingle: 4.09,
+        worldRecords: 0
+      },
+      {
+        id: "2018TING05",
+        name: "Ming Dao Ting",
+        country: "Australia",
+        continent: "Oceania",
+        bestRank: 410,
+        yearStarted: 2018,
+        prSingle: 9.96,
+        worldRecords: 0
+      },
+      {
+        id: "2021ZAJD03",
+        name: "Teodor Zajder",
+        country: "Poland",
+        continent: "Europe",
+        bestRank: 1,
+        yearStarted: 2021,
+        prSingle: 4.28,
+        worldRecords: 1
+      },
+      {
+        id: "2010WEYE02",
+        name: "Sebastian Weyer",
+        country: "Germany",
+        continent: "Europe",
+        bestRank: 3,
+        yearStarted: 2010,
+        prSingle: 4.32,
+        worldRecords: 18
+      },
+      {
+        id: "2018DULL01",
+        name: "Twan Dullemond",
+        country: "Netherlands",
+        continent: "Europe",
+        bestRank: 9,
+        yearStarted: 2018,
+        prSingle: 4.38,
+        worldRecords: 0
+      },
+      {
+        id: "2014MILL04",
+        name: "Chris Mills",
+        country: "New Zealand",
+        continent: "Oceania",
+        bestRank: 25,
+        yearStarted: 2014,
+        prSingle: 4.59,
+        worldRecords: 0
+      },
+      {
+        id: "2017STRU01",
+        name: "Milan Struyf",
+        country: "Belgium",
+        continent: "Europe",
+        bestRank: 887,
+        yearStarted: 2017,
+        prSingle: 5.88,
+        worldRecords: 0
+      },
+      {
+        id: "2019EGGI02",
+        name: "Charlie Eggins",
+        country: "Australia",
+        continent: "Oceania",
+        bestRank: 2,
+        yearStarted: 2019,
+        prSingle: 4.76,
+        worldRecords: 1
+      },
+      {
+        id: "2022HAWK03",
+        name: "Emmanuel Hawkins",
+        country: "Nigeria",
+        continent: "Africa",
+        bestRank: 7962,
+        yearStarted: 2022,
+        prSingle: 8.42,
+        worldRecords: 0
+      },
+      {
+        id: "2015CHER07",
+        name: "Tommy Cherry",
+        country: "USA",
+        continent: "North America",
+        bestRank: 1,
+        yearStarted: 2015,
+        prSingle: 4.53,
+        worldRecords: 14
+      },
+      {
+        id: "2017GARR05",
+        name: "Luke Garrett",
+        country: "USA",
+        continent: "North America",
+        bestRank: 1,
+        yearStarted: 2017,
+        prSingle: 3.44,
+        worldRecords: 1
+      }
+    ];
+
+    let target = null;
+    let guessCount = 0;
+    let maxGuesses = 5;
+    let gameOver = false;
+    let guessHistory = [];
+
+    function initGame() {
+      target = cubers[Math.floor(Math.random() * cubers.length)];
+      guessCount = 0;
+      gameOver = false;
+      guessHistory = [];
+      updateGameInfo();
+      document.getElementById('guessHistory').innerHTML = '';
+      document.getElementById('result').innerHTML = '';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchInput').disabled = false;
+      document.getElementById('guessButton').disabled = false;
+      hideSuggestions();
+    }
+
+    function updateGameInfo() {
+      document.getElementById('guessesLeft').textContent = maxGuesses - guessCount;
+      document.getElementById('totalGuesses').textContent = guessCount;
+    }
+    function updateGameInfo() {
+  if (maxGuesses === 999) {
+    document.getElementById('guessesLeft').textContent = '∞';
+  } else {
+    document.getElementById('guessesLeft').textContent = maxGuesses - guessCount;
+  }
+  document.getElementById('totalGuesses').textContent = guessCount;
+}
+
+    function openSettings() {
+      document.getElementById('settingsModal').style.display = 'block';
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+    function setMaxGuesses(newMax) {
+  maxGuesses = newMax;
+  
+  // Update active button
+  document.querySelectorAll('.guess-option').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  // Update display
+  updateGameInfo();
+  
+  // Show current setting in guesses left
+  if (maxGuesses === 999) {
+    document.getElementById('guessesLeft').textContent = '∞';
+  }
+}
+
+    // Close modal when clicking outside
+    document.getElementById('settingsModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeSettings();
+      }
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const suggestionsDiv = document.getElementById('suggestions');
+
+    searchInput.addEventListener('input', function(e) {
+      const query = e.target.value.toLowerCase().trim();
+      
+      if (query.length === 0) {
+        hideSuggestions();
+        return;
+      }
+
+      const matches = cubers.filter(cuber => 
+        cuber.name.toLowerCase().includes(query) || 
+        cuber.id.toLowerCase().includes(query)
+      ).slice(0, 10);
+
+      if (matches.length > 0) {
+        showSuggestions(matches);
+      } else {
+        hideSuggestions();
+      }
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        submitGuess();
+      }
+    });
+
+    function showSuggestions(matches) {
+      suggestionsDiv.innerHTML = '';
+      matches.forEach(cuber => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.innerHTML = `<strong>${cuber.name}</strong> <span style="color: #7f8c8d;">(${cuber.id})</span>`;
+        div.addEventListener('click', () => {
+          searchInput.value = cuber.name;
+          hideSuggestions();
+        });
+        suggestionsDiv.appendChild(div);
+      });
+      suggestionsDiv.style.display = 'block';
+    }
+
+    function hideSuggestions() {
+      suggestionsDiv.style.display = 'none';
+    }
+
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-container')) {
+        hideSuggestions();
+      }
+    });
+
+    function findCuber(input) {
+      const query = input.trim();
+      
+      // Try to find by exact ID match first
+      let cuber = cubers.find(c => c.id.toLowerCase() === query.toLowerCase());
+      
+      // If not found, try by name
+      if (!cuber) {
+        cuber = cubers.find(c => c.name.toLowerCase() === query.toLowerCase());
+      }
+      
+      // If still not found, try partial name match
+      if (!cuber) {
+        cuber = cubers.find(c => c.name.toLowerCase().includes(query.toLowerCase()));
+      }
+      
+      return cuber;
+    }
+
+    function submitGuess() {
+      if (gameOver) return;
+
+      const input = document.getElementById('searchInput').value;
+      const guessedCuber = findCuber(input);
+
+      if (!guessedCuber) {
+        alert('Cuber not found in database. Try searching by name or check the WCA ID format.');
+        return;
+      }
+
+      // Check if already guessed
+      if (guessHistory.some(g => g.id === guessedCuber.id)) {
+        alert('You already guessed this cuber!');
+        return;
+      }
+
+      guessCount++;
+      guessHistory.push(guessedCuber);
+
+      hideSuggestions();
+      displayGuess(guessedCuber);
+      updateGameInfo();
+
+      if (guessedCuber.id === target.id) {
+        endGame(true);
+      } else if (maxGuesses !== 999 && guessCount >= maxGuesses) {
+        endGame(false);
+      }
+
+      document.getElementById('searchInput').value = '';
+    }
+
+    function displayGuess(guessedCuber) {
+      const feedback = generateFeedback(guessedCuber);
+      const guessDiv = document.createElement('div');
+      guessDiv.className = 'guess-item';
+      
+      guessDiv.innerHTML = `
+        <div class="guess-header">
+          <span class="guess-name">${guessedCuber.name}</span>
+          <span class="guess-id">${guessedCuber.id}</span>
+        </div>
+        <div class="feedback-labels">
+          <div class="feedback-label">Country</div>
+          <div class="feedback-label">Best Rank</div>
+          <div class="feedback-label">Year Started</div>
+          <div class="feedback-label">PR Single</div>
+          <div class="feedback-label">World Records</div>
+        </div>
+        <div class="feedback-grid">
+          ${feedback.map(f => `<div class="feedback-box ${f.color}">${f.value}</div>`).join('')}
+        </div>
+      `;
+
+      document.getElementById('guessHistory').appendChild(guessDiv);
+    }
+
+    function generateFeedback(guessedCuber) {
+      const feedback = [];
+
+      // Country
+      if (guessedCuber.country === target.country) {
+        feedback.push({ value: guessedCuber.country, color: "green" });
+      } else if (guessedCuber.continent === target.continent) {
+        feedback.push({ value: guessedCuber.country, color: "yellow" });
+      } else {
+        feedback.push({ value: guessedCuber.country, color: "gray" });
+      }
+
+      // Best Rank - fixed arrow logic
+      if (guessedCuber.bestRank === target.bestRank) {
+        feedback.push({ value: guessedCuber.bestRank.toString(), color: "green" });
+      } else if (Math.abs(guessedCuber.bestRank - target.bestRank) <= 5) {
+        const arrow = guessedCuber.bestRank > target.bestRank ? " ⬇️" : " ⬆️";
+        feedback.push({ value: guessedCuber.bestRank + arrow, color: "yellow" });
+      } else {
+        const arrow = guessedCuber.bestRank > target.bestRank ? " ⬇️" : " ⬆️";
+        feedback.push({ value: guessedCuber.bestRank + arrow, color: "gray" });
+      }
+
+      // Year Started - exact match is green, within 5 years is yellow, others gray
+const yearDiff = Math.abs(guessedCuber.yearStarted - target.yearStarted);
+
+if (yearDiff === 0) {
+  feedback.push({ value: guessedCuber.yearStarted.toString(), color: "green" });
+} else {
+  const arrow = guessedCuber.yearStarted > target.yearStarted ? " ⬇️" : " ⬆️";
+  const color = yearDiff <= 5 ? "yellow" : "gray";
+  feedback.push({ value: guessedCuber.yearStarted + arrow, color });
+}
+
+      // PR Single - exact match is green, near is yellow, others gray
+const diff = Math.abs(guessedCuber.prSingle - target.prSingle);
+
+if (diff === 0) {
+  feedback.push({ value: guessedCuber.prSingle.toFixed(2), color: "green" });
+} else {
+  const arrow = guessedCuber.prSingle > target.prSingle ? " ⬇️" : " ⬆️";
+  const color = diff <= 0.5 ? "yellow" : "gray";
+  feedback.push({ value: guessedCuber.prSingle.toFixed(2) + arrow, color });
+}
+
+      // World Records - fixed arrow logic
+      if (guessedCuber.worldRecords === target.worldRecords) {
+        feedback.push({ value: guessedCuber.worldRecords.toString(), color: "green" });
+      } else if (Math.abs(guessedCuber.worldRecords - target.worldRecords) <= 5) {
+        const arrow = guessedCuber.worldRecords > target.worldRecords ? " ⬇️" : " ⬆️";
+        feedback.push({ value: guessedCuber.worldRecords + arrow, color: "yellow" });
+      } else {
+        const arrow = guessedCuber.worldRecords > target.worldRecords ? " ⬇️" : " ⬆️";
+        feedback.push({ value: guessedCuber.worldRecords + arrow, color: "gray" });
+      }
+
+      return feedback;
+    }
+
+    function endGame(won) {
+      gameOver = true;
+      document.getElementById('searchInput').disabled = true;
+      document.getElementById('guessButton').disabled = true;
+
+      const resultDiv = document.getElementById('result');
+      
+      if (won) {
+        resultDiv.innerHTML = `
+          <div class="result-message win-message">
+            🎉 Congratulations! You guessed it in ${guessCount} ${guessCount === 1 ? 'guess' : 'guesses'}!
+            <div class="target-reveal">
+              The answer was <strong>${target.name}</strong> (${target.id})
+            </div>
+          </div>
+        `;
+      } else {
+        resultDiv.innerHTML = `
+          <div class="result-message lose-message">
+            😢 Game Over! You've used all ${maxGuesses} guesses.
+            <div class="target-reveal">
+              The answer was <strong>${target.name}</strong> (${target.id})<br>
+              <small>Country: ${target.country} | Rank: ${target.bestRank} | Started: ${target.yearStarted} | PR: ${target.prSingle}s | WRs: ${target.worldRecords}</small>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function newGame() {
+      initGame();
+    }
+
+    // Initialize the game when the page loads
+    window.addEventListener('load', initGame);
+  </script>
+</body>
+</html>
