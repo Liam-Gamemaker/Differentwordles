@@ -1202,6 +1202,11 @@
     const searchInput = document.getElementById('searchInput');
     const suggestionsDiv = document.getElementById('suggestions');
 
+    // Prevent numbers from being entered
+searchInput.addEventListener("input", function () {
+  this.value = this.value.replace(/[0-9]/g, "");
+});
+
     searchInput.addEventListener('input', function(e) {
       const query = e.target.value.toLowerCase().trim();
       
