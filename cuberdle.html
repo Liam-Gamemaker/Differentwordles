@@ -332,6 +332,30 @@
       padding: 3px 6px;
       border-radius: 4px;
     }
+    .give-up-button {
+  flex: 1;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  border: 2px solid #e74c3c;
+  border-radius: 8px;
+  background: white;
+  color: #e74c3c;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.give-up-button:hover:not(:disabled) {
+  background: #e74c3c;
+  color: white;
+}
+
+.give-up-button:disabled {
+  border-color: #bdc3c7;
+  color: #bdc3c7;
+  cursor: not-allowed;
+}
 
     .feedback-grid {
       display: grid;
@@ -556,7 +580,7 @@
     <button class="settings-button" onclick="openSettings()">⚙️</button>
     
     <h1>🧩 Rubiks Cuber Guessing Game</h1>
-    <p class="subtitle">Guess the mystery speedcuber! Enter a name or WCA ID</p>
+    <p class="subtitle">Guess the mystery speedcuber! Enter a name that is on the avalible list in the settings!</p>
 
     <div class="game-info">
       <div class="info-item">
@@ -584,6 +608,8 @@
       <button class="guess-button" id="guessButton" onclick="submitGuess()">Make Guess</button>
       <button class="new-game-button" onclick="newGame()">New Game</button>
     </div>
+
+    <button class="give-up-button" id="giveUpButton" onclick="giveUp()" disabled>Give Up</button>
 
     <div class="guess-history" id="guessHistory"></div>
     <div id="result"></div>
@@ -1278,6 +1304,12 @@ searchInput.addEventListener("input", function () {
       return cuber;
     }
 
+    function giveUp() {
+  if (gameOver) return;
+
+  endGame(false); // End the game as if the player failed
+}
+
     function submitGuess() {
       if (gameOver) return;
 
@@ -1399,6 +1431,7 @@ if (diff === 0) {
       gameOver = true;
       document.getElementById('searchInput').disabled = true;
       document.getElementById('guessButton').disabled = true;
+      document.getElementById('giveUpButton').disabled = true;
 
       const resultDiv = document.getElementById('result');
       
@@ -1425,6 +1458,7 @@ if (diff === 0) {
     }
 
     function newGame() {
+      document.getElementById('giveUpButton').disabled = false;
       initGame();
     }
 
